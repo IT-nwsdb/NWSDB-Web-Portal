@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Select Location</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="locations">
+  <header class="app-header small">
+    <a class="back" href="index.html">Back</a>
+    <div>
+      <h1 id="regionName">Region</h1>
+      <p>Select a location sheet</p>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="box">
+      <h2>Step 2: Select Location / Sheet</h2>
+      <div class="form-row">
+        <select id="sheetSelect" class="field"></select>
+        <button id="openBtn" class="btn primary">Open Table</button>
+      </div>
+      <input id="searchBox" class="field mt" type="search" placeholder="Search location name...">
+    </section>
+
+    <section class="box">
+      <h2>Sheets</h2>
+      <div class="table-wrap small-table">
+        <table class="list-table">
+          <thead>
+            <tr><th>Sheet / Location</th><th>Type</th><th>Rows</th><th>Saved</th><th></th></tr>
+          </thead>
+          <tbody id="sheetRows"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

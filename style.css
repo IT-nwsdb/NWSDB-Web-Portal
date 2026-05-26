@@ -1,0 +1,994 @@
+/* style.css */
+:root {
+  --nwsdb-blue: #0d6efd;
+  --nwsdb-cyan: #0dcaf0;
+  --nwsdb-light-blue: #e9f2ff;
+  --dark-900: #0b1b30;
+}
+
+/* Base: theme-aware */
+body {
+  background-color: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Login */
+.login-hero {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  background: linear-gradient(135deg, var(--nwsdb-blue), var(--nwsdb-cyan));
+  background-size: 200% 200%;
+  animation: gradientShift 12s ease infinite;
+  position: relative;
+}
+@keyframes gradientShift {
+  0% { background-position:0% 50% }
+  50% { background-position:100% 50% }
+  100% { background-position:0% 50% }
+}
+.brand-panel h1, .brand-panel p, .brand-panel li { text-shadow: 0 2px 6px rgba(0,0,0,.2); }
+.bubble { position:absolute; bottom:-120px; background:rgba(255,255,255,.15); border-radius:50%; animation: floatUp 14s linear infinite; pointer-events:none; filter: blur(.2px); }
+@keyframes floatUp { 0%{transform:translateY(0) scale(1); opacity:.7} 70%{opacity:.9} 100%{transform:translateY(-110vh) scale(1.1); opacity:0} }
+.b1{width:140px;height:140px;left:10%;animation-delay:0s}
+.b2{width:90px;height:90px;left:28%;animation-delay:3s}
+.b3{width:180px;height:180px;left:50%;animation-delay:6s}
+.b4{width:70px;height:70px;left:72%;animation-delay:1s}
+.b5{width:120px;height:120px;left:85%;animation-delay:5s}
+
+.login-card { border-radius: 16px; overflow: hidden; }
+.login-icon-wrap { width:64px;height:64px;border-radius:16px;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--nwsdb-blue),var(--nwsdb-cyan));color:#fff;font-size:28px;box-shadow:0 10px 30px rgba(13,110,253,.35); animation:pulseGlow 2.8s ease-in-out infinite; }
+@keyframes pulseGlow { 0%,100%{transform:translateY(0);box-shadow:0 10px 30px rgba(13,110,253,.35);} 50%{transform:translateY(-3px);box-shadow:0 20px 35px rgba(13,110,253,.5);} }
+
+.fade-in{animation:fadeIn .9s ease both}
+.fade-in-up{animation:fadeInUp .9s ease both .15s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+.password-toggle{
+  cursor:pointer;
+  background: var(--bs-body-bg);
+  border:1px solid var(--bs-border-color);
+  border-left:0
+}
+.form-control:focus{border-color:var(--nwsdb-blue);box-shadow:0 0 0 .25rem rgba(13,110,253,.25)}
+.login-submit-btn .btn-spinner{display:inline-flex;align-items:center}
+.login-submit-btn.loading .btn-label{display:none}
+.login-submit-btn.loading .btn-spinner{display:inline-flex!important}
+
+.success-alert{
+  position:fixed;top:20px;right:20px;z-index:20000;
+  background: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  border: 1px solid var(--bs-border-color);
+  animation:slideInRight .5s forwards,fadeOut .5s forwards 2.5s
+}
+@keyframes slideInRight{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes fadeOut{from{opacity:1}to{opacity:0;visibility:hidden}}
+
+/* App shell */
+.navbar{box-shadow:0 2px 10px rgba(0,0,0,.08)}
+.navbar-brand{font-weight:700;color:var(--nwsdb-blue)}
+.nav-link{font-weight:500;padding:.5rem 1rem;transition:color .25s ease}
+.nav-link:hover{color:var(--nwsdb-blue)}
+
+.dashboard-header{
+  background:linear-gradient(to right,var(--nwsdb-blue),var(--nwsdb-cyan));
+  color:#fff;padding:2rem 0;margin-bottom:2rem;border-radius:0 0 10px 10px
+}
+
+/* Cards and surfaces (theme-aware) */
+.dashboard-card,
+.kpi-card,
+.welcome-section {
+  background: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  border: 1px solid var(--bs-border-color);
+  border-radius:10px;
+  box-shadow:0 4px 12px rgba(0,0,0,.1);
+}
+.dashboard-card{transition:transform .25s, box-shadow .25s;height:100%}
+.dashboard-card:hover{transform:translateY(-5px);box-shadow:0 8px 16px rgba(0,0,0,.18)}
+.dashboard-icon{font-size:2.5rem;color:var(--nwsdb-blue);margin-bottom:1rem}
+.card-title{font-weight:600;color:var(--bs-body-color)}
+.card-text{color:var(--bs-secondary-color);font-size:.95rem}
+
+footer{
+  background: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  padding:2rem 0;margin-top:3rem
+}
+
+/* Sections */
+.about-section{
+  background: var(--bs-tertiary-bg);
+  padding:3rem 0;border-radius:10px
+}
+.section-title{color:var(--nwsdb-blue);border-bottom:2px solid var(--nwsdb-blue);padding-bottom:.5rem;margin-bottom:1.5rem}
+
+/* Headings on data pages */
+#data-entry-page h4,#labs-entry-page h4,#plant-entry-page h4{
+  color:var(--nwsdb-blue);border-bottom:2px solid var(--nwsdb-cyan);padding-bottom:.5rem;margin-bottom:1.5rem
+}
+
+/* Region results */
+#region-results{max-height:70vh;overflow-y:auto}
+#region-list-container .list-group-item{cursor:pointer;transition:all .2s}
+#region-list-container .list-group-item:hover{background: var(--bs-tertiary-bg)}
+
+/* Tables (theme-aware) */
+.table th{
+  background: var(--bs-tertiary-bg);
+  font-weight:600
+}
+.table input{text-align:center}
+
+/* Plant photos preview */
+#plant-photos-preview{display:flex;flex-wrap:wrap;gap:10px}
+.plant-thumb{
+  position:relative;width:110px;height:110px;border-radius:10px;overflow:hidden;
+  border:1px solid var(--bs-border-color);
+  background: var(--bs-body-bg);
+  box-shadow:0 2px 6px rgba(0,0,0,.05)
+}
+.plant-thumb img{width:100%;height:100%;object-fit:cover}
+.plant-thumb .remove-thumb{
+  position:absolute;top:4px;right:4px;width:24px;height:24px;border:0;border-radius:50%;
+  background:rgba(0,0,0,.6);color:#fff;line-height:24px;text-align:center;font-size:16px;cursor:pointer
+}
+.plant-thumb .remove-thumb:hover{background:rgba(0,0,0,.75)}
+
+/* Submissions & Analytics */
+#submissions-page h5{margin-bottom:0}
+#sub-filter-bar .filter-chips{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.5rem}
+#sub-filter-bar .filter-chips .btn{border-radius:999px}
+
+.kpi-title{font-size:.9rem;color:var(--bs-secondary-color)}
+.kpi-value{font-size:1.6rem;font-weight:700;color:var(--bs-body-color)}
+#sub-charts h6{font-size:.9rem;color:var(--bs-secondary-color)}
+
+#charts-unavailable{margin-bottom:1rem}
+.scheme-chart,.plant-chart,.labs-chart{display:none}
+.sub-visible{display:block!important}
+
+/* Chart surface (theme-aware) */
+.chart-container {
+  background: var(--bs-tertiary-bg);
+  border-radius: 12px;
+  padding: 1rem;
+  border: 1px solid var(--bs-border-color);
+}
+
+/* A11y: focus rings + skip link */
+.password-toggle:focus-visible,.btn:focus-visible,.nav-link:focus-visible,
+.form-control:focus-visible,.form-select:focus-visible{
+  outline:3px solid color-mix(in oklab, var(--bs-primary), transparent 50%);
+  outline-offset:2px
+}
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  padding: .5rem .75rem;
+  z-index: 10000;
+  border: 1px solid var(--bs-border-color);
+  border-radius: .25rem;
+  transition: top .15s ease;
+}
+.skip-link:focus { top: .5rem; }
+
+/* Reduced motion */
+@media (prefers-reduced-motion:reduce){
+  .login-hero,.bubble,.login-icon-wrap{animation:none!important}
+}
+
+/* Login Page Statistics (optional decorative) */
+.login-stats-card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+.stat-card {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: transform 0.3s ease;
+}
+.stat-card:hover { transform: translateY(-5px); }
+.stat-icon { opacity: 0.9; }
+.stat-value {
+  font-size: 2.5rem; font-weight: 700; color: #fff; margin: 0.5rem 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+.stat-label {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.9rem; margin: 0; font-weight: 500;
+}
+
+/* Ensure charts are visible on login page (if any) */
+#login-page .chart-container canvas { max-height: 300px; }
+
+/* Map styles removed */
+/* Landing page map section styling */
+#landing-page .card {
+  transition: transform 0.2s ease;
+}
+
+#landing-page .card:hover {
+  transform: translateY(-2px);
+}
+
+/* Loading state for public map */
+.public-map-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+  background: var(--bs-tertiary-bg);
+  border-radius: 8px;
+  border: 1px solid var(--bs-border-color);
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.public-map-loading .spinner-border {
+  color: var(--nwsdb-blue);
+  width: 3rem;
+  height: 3rem;
+}
+
+.public-map-loading .loading-text {
+  color: var(--bs-secondary-color);
+  font-size: 1.1rem;
+}
+
+/* No data state for public map */
+.public-map-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+  background: var(--bs-tertiary-bg);
+  border-radius: 8px;
+  border: 1px solid var(--bs-border-color);
+  color: var(--bs-secondary-color);
+  text-align: center;
+  padding: 2rem;
+  gap: 1rem;
+}
+
+.public-map-empty i {
+  font-size: 3rem;
+  color: var(--bs-border-color);
+  opacity: 0.7;
+}
+
+.public-map-empty h4 {
+  color: var(--bs-secondary-color);
+  margin: 0;
+}
+
+.public-map-empty p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Error state for public map */
+.public-map-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+  background: var(--bs-tertiary-bg);
+  border-radius: 8px;
+  border: 1px solid var(--bs-border-color);
+  color: var(--bs-danger);
+  text-align: center;
+  padding: 2rem;
+  gap: 1rem;
+}
+
+.public-map-error i {
+  font-size: 3rem;
+  color: var(--bs-danger);
+}
+
+.public-map-error h4 {
+  color: var(--bs-danger);
+  margin: 0;
+}
+
+/* Map container enhancements */
+.map-container {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.map-container .map-overlay {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1000;
+  background: var(--bs-body-bg);
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--bs-border-color);
+  font-size: 0.875rem;
+  color: var(--bs-secondary-color);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Responsive adjustments for public map */
+@media (max-width: 768px) {
+  #public-plant-map {
+    height: 300px !important;
+  }
+  
+  .plant-popup-photos {
+    gap: 2px;
+  }
+  
+  .plant-popup-photo {
+    width: 50px;
+    height: 50px;
+  }
+  
+  /* leaflet rule removed */
+  
+  .public-map-loading,
+  .public-map-empty,
+  .public-map-error {
+    height: 300px;
+    padding: 1.5rem;
+  }
+  
+  .public-map-loading .spinner-border {
+    width: 2rem;
+    height: 2rem;
+  }
+  
+  .public-map-empty i,
+  .public-map-error i {
+    font-size: 2.5rem;
+  }
+}
+
+@media (max-width: 576px) {
+  #public-plant-map {
+    height: 250px !important;
+  }
+  
+  .plant-popup-photo {
+    width: 45px;
+    height: 45px;
+  }
+  
+  .public-map-loading,
+  .public-map-empty,
+  .public-map-error {
+    height: 250px;
+    padding: 1rem;
+  }
+}
+
+/* Map legend styles */
+.map-legend {
+  background: var(--bs-body-bg);
+  border: 1px solid var(--bs-border-color);
+  border-radius: 6px;
+  padding: 10px;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.map-legend h6 {
+  margin: 0 0 8px 0;
+  color: var(--bs-body-color);
+  font-weight: 600;
+}
+
+.map-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.map-legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  border: 1px solid var(--bs-border-color);
+}
+
+/* =========================================================
+   Dark mode refinements (Bootstrap 5.3 data-bs-theme="dark")
+   These are minimal thanks to theme tokens above
+   ========================================================= */
+:root, [data-bs-theme="light"] { color-scheme: light; }
+[data-bs-theme="dark"] { color-scheme: dark; }
+
+/* Handle any leftover bg-white usage gracefully */
+[data-bs-theme="dark"] .bg-white {
+  background-color: var(--bs-body-bg) !important;
+  color: var(--bs-body-color) !important;
+}
+
+/* Navbar tone in dark */
+[data-bs-theme="dark"] .navbar {
+  background-color: var(--bs-body-bg);
+  box-shadow: 0 2px 10px rgba(0,0,0,.35);
+}
+[data-bs-theme="dark"] .navbar .navbar-brand,
+[data-bs-theme="dark"] .navbar .nav-link,
+[data-bs-theme="dark"] .navbar .navbar-text {
+  color: var(--bs-body-color) !important;
+}
+[data-bs-theme="dark"] .navbar .nav-link.active,
+[data-bs-theme="dark"] .navbar .nav-link:focus,
+[data-bs-theme="dark"] .navbar .nav-link:hover {
+  color: var(--bs-primary) !important;
+}
+
+/* Tables in dark */
+[data-bs-theme="dark"] .table {
+  color: var(--bs-body-color);
+}
+[data-bs-theme="dark"] .table thead,
+[data-bs-theme="dark"] .table .table-light th,
+[data-bs-theme="dark"] .table .table-light td,
+[data-bs-theme="dark"] .table th {
+  background-color: rgba(255,255,255,0.06) !important;
+  color: var(--bs-body-color) !important;
+  border-color: var(--bs-border-color);
+}
+[data-bs-theme="dark"] .table-hover tbody tr:hover {
+  background-color: rgba(255,255,255,0.04);
+}
+
+/* List groups */
+[data-bs-theme="dark"] .list-group-item {
+  background-color: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  border-color: var(--bs-border-color);
+}
+
+/* Modals and alerts */
+[data-bs-theme="dark"] .modal-content,
+[data-bs-theme="dark"] .alert {
+  background-color: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  border-color: var(--bs-border-color);
+}
+
+/* Plant photos preview in dark */
+[data-bs-theme="dark"] .plant-thumb {
+  background: var(--bs-body-bg);
+  border-color: var(--bs-border-color);
+  box-shadow: 0 2px 6px rgba(0,0,0,.25);
+}
+[data-bs-theme="dark"] .plant-thumb .remove-thumb {
+  background: rgba(255,255,255,0.14);
+  color: var(--bs-body-color);
+}
+[data-bs-theme="dark"] .plant-thumb .remove-thumb:hover {
+  background: rgba(255,255,255,0.24);
+}
+
+/* Footer: slightly stronger tone in dark for contrast */
+[data-bs-theme="dark"] footer {
+  background: #1f2328;
+  color: #e6edf3;
+}
+[data-bs-theme="dark"] footer a { color: #e6edf3; }
+
+/* Submissions chart group visibility (dup-safe) */
+#sub-charts .scheme-chart,
+#sub-charts .plant-chart,
+#sub-charts .labs-chart { display: none; }
+#sub-charts .sub-visible { display: block; }
+
+/* Public map dark mode enhancements */
+[data-bs-theme="dark"] /* leaflet rule removed */
+
+[data-bs-theme="dark"] /* leaflet rule removed */
+
+[data-bs-theme="dark"] /* leaflet rule removed */
+
+[data-bs-theme="dark"] /* leaflet rule removed */
+
+[data-bs-theme="dark"] .plant-popup-photo {
+  border-color: var(--bs-border-color);
+}
+
+[data-bs-theme="dark"] .public-map-loading,
+[data-bs-theme="dark"] .public-map-empty,
+[data-bs-theme="dark"] .public-map-error {
+  background: var(--bs-tertiary-bg);
+  border-color: var(--bs-border-color);
+}
+
+[data-bs-theme="dark"] .map-container .map-overlay {
+  background: var(--bs-body-bg);
+  border-color: var(--bs-border-color);
+  color: var(--bs-body-color);
+}
+
+[data-bs-theme="dark"] .map-legend {
+  background: var(--bs-body-bg);
+  border-color: var(--bs-border-color);
+  color: var(--bs-body-color);
+}
+
+/* Print styles for maps */
+@media print {
+  #public-plant-map {
+    height: 400px !important;
+    break-inside: avoid;
+  }
+  
+  /* leaflet rule removed */
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .plant-thumb {
+    border-width: 2px;
+  }
+  
+  .plant-popup-photo {
+    border-width: 2px;
+  }
+  
+  /* leaflet rule removed */
+  
+  .btn {
+    border-width: 2px;
+  }
+}
+
+/* Reduced transparency support */
+@media (prefers-reduced-transparency: reduce) {
+  .login-stats-card,
+  .stat-card {
+    background: var(--bs-body-bg);
+    backdrop-filter: none;
+  }
+  
+  .bubble {
+    opacity: 0.3;
+  }
+}
+/* Ensure map containers have proper dimensions */
+#plant-map, #public-plant-map, #map-picker {
+  min-height: 400px;
+  width: 100%;
+}
+
+/* Plant photo preview styles */
+.plant-thumb {
+  position: relative;
+  display: inline-block;
+  margin: 5px;
+}
+
+.plant-thumb img {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.remove-thumb {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.plant-popup-photos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 8px;
+}
+
+.plant-popup-photo {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+/* Plant Popup Photos */
+.plant-popup-photos-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.plant-popup-photo {
+  width: 100%;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 4px;
+  transition: transform 0.2s, opacity 0.2s;
+}
+
+.plant-popup-photo:hover {
+  transform: scale(1.05);
+  opacity: 0.9;
+}
+
+.plant-popup-section {
+  border-top: 1px solid #dee2e6;
+  padding-top: 12px;
+}
+
+/* Photo Gallery */
+.photo-thumbnails {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 8px 0;
+}
+
+.photo-thumb {
+  width: 60px;
+  height: 60px;
+  border: 2px solid transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: border-color 0.2s;
+}
+
+.photo-thumb.active {
+  border-color: #0d6efd;
+}
+
+.photo-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 2px;
+}
+
+.photo-thumb:hover {
+  border-color: #6c757d;
+}
+
+/* Map container fixes */
+#public-plant-map, #plant-map, #map-picker {
+  min-height: 400px;
+}
+
+/* Ensure map containers are visible */
+/* leaflet rule removed */
+
+/* Loading state for maps */
+.map-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+  background: #f8f9fa;
+  color: #6c757d;
+}
+
+
+/* === RSC(C) designation width fix (2025-10-27) === */
+#hrm-rsc-table td:nth-child(2) { 
+  width: 28%;
+  min-width: 320px;
+}
+#hrm-rsc-table select.hrm-rsc-designation {
+  width: 100%;
+  min-width: 320px;
+  max-width: 100%;
+}
+/* Allow long labels to be visible within table cells */
+#hrm-rsc-table td:nth-child(2),
+#hrm-rsc-table th:nth-child(2) {
+  white-space: normal;
+}
+
+
+/* === RSC(C) responsive, max-space, user-friendly layout (2025-10-27) === */
+/* Use full page width */
+body .container, body .container-lg, body .container-xl, body .container-fluid {
+  max-width: 100%;
+}
+
+/* Table should use available width and wrap text nicely */
+#hrm-rsc .table-responsive { overflow-x: auto; }
+#hrm-rsc-table { width: 100%; table-layout: auto; }
+
+/* Allow header and cell text to wrap instead of overflow */
+#hrm-rsc-table th, #hrm-rsc-table td {
+  white-space: normal;
+  vertical-align: middle;
+}
+
+/* Make the Designation column wide but responsive (no forced overflow) */
+#hrm-rsc-table td:nth-child(2) { 
+  width: clamp(220px, 28vw, 520px);
+}
+/* Override previous min-widths so it doesn't blow past the table width */
+#hrm-rsc-table select.hrm-rsc-designation {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0; /* override earlier min-width:320px */
+}
+
+/* Slightly reduce header font-size to fit more cleanly in two-line headers */
+#hrm-rsc-table thead th {
+  font-size: 0.92rem;
+}
+
+/* Reduce excessive side padding on the card so table gets more width */
+.hrm-card .card-body, #hrm-rsc .card-body {
+  padding-left: 12px;
+  padding-right: 12px;
+}
+
+
+/* === RSC(C) column sizing: narrow No. / wider Designation (2025-10-27) === */
+/* Make the first column ("No.") compact */
+#hrm-rsc-table th:nth-child(1),
+#hrm-rsc-table td:nth-child(1) {
+  width: 64px !important;
+  max-width: 72px !important;
+  min-width: 56px !important;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* Give Designation much more room (responsive) */
+#hrm-rsc-table th:nth-child(2),
+#hrm-rsc-table td:nth-child(2) {
+  width: clamp(360px, 38vw, 760px) !important;
+  max-width: 100% !important;
+  white-space: normal;
+}
+
+/* Ensure the designation select fills its cell but doesn't force overflow */
+#hrm-rsc-table select.hrm-rsc-designation {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  white-space: normal;
+}
+
+
+/* === RSC(C) balanced layout (2025-10-27) === */
+#hrm-rsc-table {
+  width: 100%;
+  table-layout: fixed; /* predictable column widths */
+}
+
+/* Let text wrap and keep vertical alignment tidy */
+#hrm-rsc-table th, #hrm-rsc-table td {
+  white-space: normal;
+  vertical-align: middle;
+}
+
+/* 1) No. column: compact */
+#hrm-rsc-table th:nth-child(1),
+#hrm-rsc-table td:nth-child(1) {
+  width: 60px !important;
+  max-width: 70px !important;
+  min-width: 56px !important;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* 2) Designation: take the bulk of space */
+#hrm-rsc-table th:nth-child(2),
+#hrm-rsc-table td:nth-child(2) {
+  width: clamp(360px, 36%, 48%) !important;
+}
+#hrm-rsc-table select.hrm-rsc-designation {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  white-space: normal;
+}
+
+/* 3) Numeric columns A..I compact and consistent (cols 3..11) */
+#hrm-rsc-table th:nth-child(3),
+#hrm-rsc-table td:nth-child(3),
+#hrm-rsc-table th:nth-child(4),
+#hrm-rsc-table td:nth-child(4),
+#hrm-rsc-table th:nth-child(5),
+#hrm-rsc-table td:nth-child(5),
+#hrm-rsc-table th:nth-child(6),
+#hrm-rsc-table td:nth-child(6),
+#hrm-rsc-table th:nth-child(7),
+#hrm-rsc-table td:nth-child(7),
+#hrm-rsc-table th:nth-child(8),
+#hrm-rsc-table td:nth-child(8),
+#hrm-rsc-table th:nth-child(9),
+#hrm-rsc-table td:nth-child(9),
+#hrm-rsc-table th:nth-child(10),
+#hrm-rsc-table td:nth-child(10),
+#hrm-rsc-table th:nth-child(11),
+#hrm-rsc-table td:nth-child(11) {
+  width: 5% !important;
+}
+
+/* 4) Remarks a bit wider */
+#hrm-rsc-table th:nth-child(12),
+#hrm-rsc-table td:nth-child(12) {
+  width: 9% !important;
+}
+
+/* 5) Justification column */
+#hrm-rsc-table th:nth-child(13),
+#hrm-rsc-table td:nth-child(13) {
+  width: 10% !important;
+}
+
+/* Slightly smaller header text to prevent crowding */
+#hrm-rsc-table thead th {
+  font-size: 0.92rem;
+  line-height: 1.2;
+}
+
+/* Reduce left/right padding on the HRM card so more width goes to the table */
+.hrm-card .card-body, #hrm-rsc .card-body {
+  padding-left: 12px;
+  padding-right: 12px;
+}
+
+
+/* === Fix overlapping header text in "For New Cadre (2025 onwards)" (2025-10-27) === */
+#hrm-rsc-table thead th {
+  white-space: normal !important;
+  line-height: 1.35 !important;
+  padding: 6px 4px !important;
+  vertical-align: middle !important;
+}
+
+/* Add breathing space between the two header rows */
+#hrm-rsc-table thead tr:nth-child(2) th {
+  padding-top: 8px !important;
+}
+
+/* Specifically fix the merged header cell for New Cadre block */
+#hrm-rsc-table thead th[colspan="3"] {
+  text-align: center !important;
+  padding-bottom: 6px !important;
+  border-bottom: 2px solid #ddd !important;
+  line-height: 1.4 !important;
+}
+
+/* Prevent the subheaders (F, G, H) from overlapping */
+#hrm-rsc-table thead tr:nth-child(3) th {
+  line-height: 1.4 !important;
+  white-space: normal !important;
+}
+
+/* Slightly shrink header font so text fits cleanly */
+#hrm-rsc-table thead th {
+  font-size: 0.91rem !important;
+}
+
+
+/* === Prevent overlapping header text via thead/colgroup (2025-10-27) === */
+#hrm-rsc-table thead th {
+  white-space: normal;
+  line-height: 1.35;
+  padding: 8px 6px;
+  vertical-align: middle;
+}
+#hrm-rsc-table thead .new-cadre-head {
+  text-align: center;
+  border-bottom: 2px solid #e3e3e3;
+  padding-bottom: 6px;
+}
+#hrm-rsc-table thead tr.subhead th {
+  line-height: 1.4;
+}
+
+
+/* === HRM header fields horizontal layout (2025-10-27) === */
+.hrm-header-row, #hrm-rsc-header-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: flex-start;
+  margin-bottom: 0.75rem;
+}
+
+.hrm-header-row input,
+#hrm-rsc-header-row input {
+  flex: 1 1 200px;
+  min-width: 180px;
+  max-width: 280px;
+}
+
+.hrm-header-row label,
+#hrm-rsc-header-row label {
+  font-weight: 500;
+  margin-right: 0.25rem;
+}
+
+.hrm-header-field {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+
+/* === RSC(C) designation width reduced by 50% (2025-10-27) === */
+#hrm-rsc-table td:nth-child(2) {
+  width: 14% !important;
+  min-width: 160px !important;
+}
+#hrm-rsc-table select.hrm-rsc-designation {
+  width: 100% !important;
+  min-width: 160px !important;
+  max-width: 100% !important;
+}
+
+
+/* Submissions Report sidebar */
+#sub-report-body { max-height: 520px; overflow: auto; }
+#sub-report-body table { font-size: .85rem; }
+
+
+/* === Dashboard chart sizing tweaks (2025-11-03) === */
+.scheme-chart canvas, .plant-chart canvas, #lp-chart-share, #lp-chart-monthly, #lp-chart-region, #chart-supplier-bill, #chart-location-qty {
+  max-height: 340px !important;
+  width: 100% !important;
+  display: block;
+}
+.scheme-chart, .plant-chart { padding: 10px; }
+
+
+/* Plant Overlay (replaces Plant modal) */
+.plant-overlay{
+  position:fixed;
+  inset:0;
+  z-index: 2000;
+  background: rgba(0,0,0,0.55);
+  display:flex;
+  flex-direction:column;
+}
+.plant-overlay-header{
+  flex:0 0 auto;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:12px 16px;
+  background:#fff;
+  border-bottom:1px solid #e5e5e5;
+}
+.plant-overlay-title{
+  font-weight:700;
+}
+.plant-overlay-body{
+  flex:1 1 auto;
+  background:#fff;
+  overflow:hidden;
+}
+body.plant-overlay-open{
+  overflow:hidden !important;
+}

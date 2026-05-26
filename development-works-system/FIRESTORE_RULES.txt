@@ -1,0 +1,23 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function validSheetId(sheetId) {
+      return sheetId in ['proposed', 'feasibility', 'rechargable'];
+    }
+
+    match /project_data_entry_sheets/{sheetId} {
+      allow read: if validSheetId(sheetId);
+
+      allow create, update: if validSheetId(sheetId)
+        && request.resource.data.keys().hasOnly(['sheetKey', 'title', 'version', 'rows', 'updatedAt', 'updatedBy'])
+        && request.resource.data.sheetKey == sheetId
+        && request.resource.data.title is string
+        && request.resource.data.version is int
+        && request.resource.data.rows is list
+        && request.resource.data.rows.size() <= 5000
+        && request.resource.data.updatedBy is string;
+
+      allow delete: if false;
+    }
+  }
+}

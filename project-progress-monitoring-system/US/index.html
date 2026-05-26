@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Action/Activity Plan</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="fit-view">
+
+<nav class="navbar navbar-dark bg-primary">
+  <div class="container-fluid">
+    <a class="navbar-brand fw-semibold text-decoration-none" id="navTitle" href="../index.html">Action/Activity Plan - 2026</a>
+
+    <div class="d-flex gap-2 align-items-center flex-wrap">
+      <div class="form-check form-switch text-white small mb-0">
+        <input class="form-check-input" type="checkbox" role="switch" id="toggleFit" checked>
+        <label class="form-check-label" for="toggleFit">Fit to screen</label>
+      </div>
+
+      <button class="btn btn-sm btn-outline-light" data-bs-toggle="offcanvas" data-bs-target="#adminPanel" aria-controls="adminPanel">
+        Admin
+      </button>
+      <button id="btnNewProject" class="btn btn-sm btn-light">+ New Project</button>
+      <button id="clearAll" class="btn btn-sm btn-danger">Clear</button>
+    </div>
+  </div>
+</nav>
+
+<div class="container-fluid my-4">
+
+  <div class="text-center mb-3">
+    <h5 class="fw-bold mb-1" id="pageTitle">Action/Activity Plan - 2026</h5>
+    <div class="fw-semibold">Ministry of Housing, Construction and Water Supply</div>
+  </div>
+
+  <div class="row mb-2">
+    <div class="col-md-6">
+      <label class="fw-semibold">Implementing Agency</label>
+      <input id="implementingAgency" class="form-control form-control-sm" autocomplete="off">
+    </div>
+    <div class="col-md-6">
+      <label class="fw-semibold">Name of the Project</label>
+      <input id="projectName" class="form-control form-control-sm" autocomplete="off">
+    </div>
+  </div>
+
+  <div class="row mb-3">
+    <div class="col-md-6">
+      <label class="fw-semibold">Area of Responsibility</label>
+      <input id="areaResponsibility" class="form-control form-control-sm" autocomplete="off">
+    </div>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <span class="fw-semibold">Project Details</span>
+      <div class="small text-muted" id="saveState">Saved</div>
+    </div>
+
+    <div class="card-body p-0">
+      <div class="table-responsive table-wrap" id="tableWrap">
+        <table class="table table-bordered table-sm mb-0 table-aap" id="dataTable">
+          <thead class="table-light text-center">
+            <tr>
+              <th>#</th>
+              <th>Project Name/ Sub Activities</th>
+              <th>Responsibility</th>
+              <th>Date of Commencement</th>
+              <th>Date of Completion</th>
+              <th>TEC (Rs.Mn.)</th>
+              <th id="allocHeader">Allocation for 2026 (Rs.Mn.)</th>
+              <th>Bills in finance section - LKR</th>
+              <th>Expenditure - LKR</th>
+              <th id="progressHeader">Physical progress as at 31/01/2026 - %</th>
+              <th>Current status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- New Project Modal -->
+<div class="modal fade" id="newProjectModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div>
+          <h5 class="modal-title mb-0">New Project</h5>
+          <div class="small text-muted">Fill details and click Save</div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+        <form id="projectForm" class="needs-validation" novalidate>
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label fw-semibold">Project Name/ Sub Activities <span class="text-danger">*</span></label>
+              <textarea id="f_project" class="form-control" rows="2" required placeholder="Enter project name / sub activities"></textarea>
+              <div class="invalid-feedback">This field is required.</div>
+            </div>
+
+            <div class="col-12 col-md-6">
+              <label class="form-label fw-semibold">Responsibility</label>
+              <input id="f_resp" class="form-control" placeholder="Responsibility">
+            </div>
+
+            <div class="col-12 col-md-6">
+              <label class="form-label fw-semibold">Physical progress as at 31/01/<span id="modalYear1">2026</span> - %</label>
+              <input id="f_progress" class="form-control" placeholder="e.g. 100%">
+            </div>
+
+            <div class="col-12 col-md-6">
+              <label class="form-label fw-semibold">Date of Commencement</label>
+              <input id="f_start" type="date" class="form-control">
+            </div>
+
+            <div class="col-12 col-md-6">
+              <label class="form-label fw-semibold">Date of Completion</label>
+              <input id="f_end" type="date" class="form-control">
+            </div>
+
+            <div class="col-12 col-md-4">
+              <label class="form-label fw-semibold">TEC (Rs.Mn.)</label>
+              <input id="f_tec" type="number" class="form-control" inputmode="decimal" placeholder="0">
+            </div>
+
+            <div class="col-12 col-md-4">
+              <label class="form-label fw-semibold">Allocation for <span id="modalYear2">2026</span> (Rs.Mn.)</label>
+              <input id="f_alloc" type="number" class="form-control" inputmode="decimal" placeholder="0">
+            </div>
+
+            <div class="col-12 col-md-4">
+              <label class="form-label fw-semibold">Bills in finance section - LKR</label>
+              <input id="f_bills" type="number" class="form-control" inputmode="decimal" placeholder="0">
+            </div>
+
+            <div class="col-12 col-md-6">
+              <label class="form-label fw-semibold">Expenditure - LKR</label>
+              <input id="f_exp" type="number" class="form-control" inputmode="decimal" placeholder="0">
+            </div>
+
+            <div class="col-12 col-md-6">
+              <label class="form-label fw-semibold">Current status</label>
+              <input id="f_status" class="form-control" placeholder="e.g. Completed / Tender awarded">
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button id="btnModalReset" class="btn btn-outline-secondary" type="button">Reset</button>
+        <button id="btnModalSave" class="btn btn-success" type="button">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Admin Panel (no login) -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="adminPanel" aria-labelledby="adminPanelLabel">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title" id="adminPanelLabel">Admin Panel</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body">
+    <div class="card">
+      <div class="card-body">
+        <div class="fw-semibold mb-2">Year</div>
+
+        <div class="row g-2 align-items-end">
+          <div class="col-8">
+            <label class="form-label small">Select year</label>
+            <select id="yearSelect" class="form-select form-select-sm"></select>
+          </div>
+          <div class="col-4">
+            <button id="btnSwitchYear" class="btn btn-sm btn-primary w-100">Switch</button>
+          </div>
+          <div class="col-8 mt-2">
+            <label class="form-label small">Add new year</label>
+            <input id="newYearInput" class="form-control form-control-sm" placeholder="e.g. 2027" inputmode="numeric" autocomplete="off">
+          </div>
+          <div class="col-4 mt-2">
+            <button id="btnAddYear" class="btn btn-sm btn-outline-primary w-100">Add</button>
+          </div>
+        </div>
+
+        <hr>
+        <div class="small text-muted">
+          Switching the year loads a separate table. If you switch back, old data will still be there.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script type="module" src="app.js"></script>
+</body>
+</html>

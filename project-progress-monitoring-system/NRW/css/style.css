@@ -1,0 +1,141 @@
+:root {
+  --app-blue: #0f3f7a;
+  --app-blue-dark: #082e5d;
+  --app-bg: #f4f7fb;
+  --app-border: #dbe3ef;
+  --app-text: #1f2937;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--app-bg);
+  color: var(--app-text);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.app-navbar {
+  background: linear-gradient(135deg, var(--app-blue), var(--app-blue-dark));
+}
+
+.app-card,
+.summary-card {
+  border: 1px solid var(--app-border);
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(15, 63, 122, 0.08);
+}
+
+.app-card .card-header {
+  background: #ffffff;
+  border-bottom: 1px solid var(--app-border);
+  border-radius: 16px 16px 0 0;
+  padding: 18px 20px;
+}
+
+.app-card .card-body {
+  background: #ffffff;
+  border-radius: 0 0 16px 16px;
+}
+
+.summary-card {
+  background: #ffffff;
+  padding: 20px;
+  min-height: 118px;
+}
+
+.summary-card p {
+  color: #6b7280;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.summary-card h3 {
+  margin: 0;
+  color: var(--app-blue);
+  font-weight: 700;
+  font-size: 24px;
+  word-break: break-word;
+}
+
+.form-label {
+  font-weight: 600;
+  font-size: 13px;
+  color: #374151;
+}
+
+.form-control {
+  border-radius: 10px;
+  border-color: #ccd6e3;
+}
+
+.form-control:focus {
+  border-color: var(--app-blue);
+  box-shadow: 0 0 0 0.2rem rgba(15, 63, 122, 0.15);
+}
+
+.btn {
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.search-box {
+  width: min(100%, 360px);
+}
+
+.table {
+  font-size: 13px;
+}
+
+.table thead th {
+  background: var(--app-blue);
+  color: #ffffff;
+  vertical-align: middle;
+  white-space: nowrap;
+  font-size: 12px;
+  text-align: center;
+}
+
+.table tbody td {
+  vertical-align: middle;
+  min-width: 120px;
+}
+
+.table tbody td:nth-child(4) {
+  min-width: 280px;
+}
+
+.table tbody td:last-child {
+  min-width: 150px;
+  text-align: center;
+}
+
+.action-btns {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.empty-state {
+  padding: 28px;
+  text-align: center;
+  color: #6b7280;
+  background: #ffffff;
+  border-top: 1px solid var(--app-border);
+}
+
+.status-pill {
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  main {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  .summary-card h3 {
+    font-size: 20px;
+  }
+}

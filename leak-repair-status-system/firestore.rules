@@ -1,0 +1,55 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function validLeakRepairDocument(docId) {
+      return request.resource.data.keys().hasOnly([
+          'docId',
+          'regionId',
+          'regionName',
+          'sheetName',
+          'sheetType',
+          'maxRows',
+          'maxCols',
+          'savedAt',
+          'savedAtClient',
+          'cells'
+        ])
+        && request.resource.data.docId == docId
+        && request.resource.data.regionId in [
+          'CENTRAL_SOUTH',
+          'CENTRAL_EAST',
+          'MATALE',
+          'CENTRAL_NORTH'
+        ]
+        && request.resource.data.regionName is string
+        && request.resource.data.sheetName is string
+        && request.resource.data.sheetType in ['location', 'summary']
+        && request.resource.data.maxRows is int
+        && request.resource.data.maxRows >= 0
+        && request.resource.data.maxRows <= 10000
+        && request.resource.data.maxCols is int
+        && request.resource.data.maxCols >= 0
+        && request.resource.data.maxCols <= 200
+        && request.resource.data.savedAt is timestamp
+        && request.resource.data.savedAtClient is string
+        && request.resource.data.cells is map
+        && request.resource.data.cells.size() <= 10000;
+    }
+
+    match /leakRepairStatus/{docId} {
+      allow read: if signedIn();
+      allow create, update: if signedIn() && validLeakRepairDocument(docId);
+      allow delete: if signedIn();
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

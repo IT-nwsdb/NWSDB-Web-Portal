@@ -1,0 +1,647 @@
+/* Layout inspired by the provided PDF */
+:root{
+  --border:#222;
+  --bg:#fff;
+  --muted:#444;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  font-family: Arial, Helvetica, sans-serif;
+  background:#f3f3f3;
+  color:#111;
+}
+.page{
+  width:min(1200px, 98vw);
+  margin:24px auto;
+  background:var(--bg);
+  padding:18px 18px 22px;
+  border:1px solid #ddd;
+  box-shadow:0 8px 22px rgba(0,0,0,.08);
+}
+.head{
+  text-align:center;
+  margin-bottom:10px;
+}
+.title{
+  font-weight:700;
+  font-size:18px;
+  margin-bottom:4px;
+}
+.sub{
+  font-weight:700;
+  font-size:14px;
+  margin-bottom:8px;
+}
+.datetime-row{
+  display:flex;
+  justify-content:center;
+  gap:18px;
+  font-size:13px;
+  margin-bottom:14px;
+}
+.dt{
+  border:1px solid #ddd;
+  padding:6px 10px;
+  border-radius:4px;
+  background:#fafafa;
+}
+.dt .date{
+  font-weight:700;
+}
+.dt .time{
+  margin-left:8px;
+  color:var(--muted);
+  font-weight:700;
+}
+.table-wrap{
+  overflow:auto;
+  border:1px solid var(--border);
+}
+table{
+  border-collapse:collapse;
+  width:100%;
+  min-width: 1050px;
+}
+th, td{
+  border:1px solid var(--border);
+  padding:6px 6px;
+  font-size:12px;
+  text-align:center;
+  vertical-align:middle;
+}
+thead th{
+  font-weight:700;
+  background:#fff;
+}
+th.group{
+  font-size:12px;
+}
+th.no{width:45px;}
+th.region{width:160px;}
+th.plant{width:160px;}
+th.capacity{width:150px;}
+th.connections{width:130px;}
+th.tcol{width:115px;}
+
+td.left{
+  text-align:left;
+}
+input.cell{
+  width:100%;
+  border:none;
+  outline:none;
+  font-size:12px;
+  text-align:center;
+  background:transparent;
+}
+input.cell:focus{
+  background:#fffbe6;
+}
+.actions{
+  display:flex;
+  gap:10px;
+  margin-top:14px;
+  justify-content:flex-end;
+}
+
+/* --- Compare dropdown --- */
+.dropdown{ position:relative; display:inline-flex; }
+.dropdown-menu{
+  position:absolute;
+  top:calc(100% + 6px);
+  right:0;
+  min-width:200px;
+  background:#fff;
+  border:1px solid #ddd;
+  border-radius:10px;
+  box-shadow:0 10px 25px rgba(0,0,0,.12);
+  padding:6px;
+  z-index:50;
+  display:none;
+}
+.dropdown-menu.open{ display:block; }
+.dropdown-item{
+  width:100%;
+  text-align:left;
+  padding:9px 10px;
+  border-radius:8px;
+  border:0;
+  background:transparent;
+  color:#111;
+  font-weight:700;
+}
+.dropdown-item:hover{ background:#f3f3f3; }
+button{
+  padding:8px 12px;
+  border:1px solid #111;
+  background:#111;
+  color:#fff;
+  font-weight:700;
+  border-radius:6px;
+  cursor:pointer;
+}
+button:hover{opacity:.9;}
+button.ghost{
+  background:#fff;
+  color:#111;
+}
+.note{
+  margin-top:10px;
+  font-size:12px;
+  color:#444;
+}
+@media print{
+  body{background:#fff;}
+  .page{box-shadow:none; border:none; margin:0; width:100%;}
+  .actions,.note{display:none;}
+}
+
+
+/* District/Section row (matches PDF group headings) */
+.section-row td{
+  font-weight:700;
+  text-align:left;
+  background:#f7f7f7;
+  padding:7px 8px;
+}
+.section-cell{
+  text-transform:none;
+}
+
+
+/* Yellow date/time header like PDF */
+.datetime-head th{
+  border:1px solid var(--border);
+  padding:6px 6px;
+  font-size:12px;
+}
+.blank-head{
+  background:#fff;
+}
+.datetime-cell{
+  background:#ffeb3b;
+  font-weight:700;
+}
+
+
+/* Navbar */
+.nav{
+  position:sticky;
+  top:0;
+  z-index:20;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:10px 14px;
+  background:#111;
+  color:#fff;
+  border-radius:10px;
+  margin-bottom:14px;
+}
+.brand{font-weight:800; letter-spacing:.3px;}
+.nav-links{display:flex; gap:8px; align-items:center;}
+.nav-btn{
+  padding:7px 10px;
+  border:1px solid #fff;
+  background:transparent;
+  color:#fff;
+  border-radius:8px;
+  font-weight:700;
+  cursor:pointer;
+}
+.nav-btn.active{
+  background:#fff;
+  color:#111;
+}
+.nav-date{
+  font-weight:700;
+  opacity:.9;
+  font-size:12px;
+}
+
+/* Page switching */
+.hidden{display:none;}
+
+/* Buttons */
+button.small{padding:6px 10px; font-size:12px; border-radius:8px;}
+button:disabled{opacity:.45; cursor:not-allowed;}
+
+/* Submissions layout */
+.submissions-layout{
+  display:grid;
+  grid-template-columns: 360px 1fr;
+  gap:14px;
+}
+.submissions-list, .submissions-view{
+  border:1px solid #ddd;
+  border-radius:12px;
+  padding:12px;
+  background:#fff;
+}
+.list-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:10px;
+}
+.lh-title{font-weight:800;}
+.cards{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  max-height: 70vh;
+  overflow:auto;
+  padding-right:6px;
+}
+.card{
+  border:1px solid #ddd;
+  border-radius:12px;
+  padding:10px;
+  background:#fafafa;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+}
+.card .meta{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+.card .date{font-weight:800;}
+.badge{
+  font-size:11px;
+  font-weight:800;
+  padding:3px 8px;
+  border-radius:999px;
+  border:1px solid #111;
+  width:fit-content;
+}
+.badge.submitted{background:#111; color:#fff;}
+.badge.saved{background:#fff; color:#111;}
+.card .open{
+  padding:6px 10px;
+  border-radius:10px;
+  background:#111;
+  color:#fff;
+  border:1px solid #111;
+  font-weight:800;
+  cursor:pointer;
+}
+
+.card .actions{
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+.card .delete{
+  padding:6px 10px;
+  border-radius:10px;
+  background:#fff;
+  color:#b00020;
+  border:1px solid #b00020;
+  font-weight:800;
+  cursor:pointer;
+}
+.card .delete:hover{
+  background:#b00020;
+  color:#fff;
+}
+.view-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin-bottom:10px;
+}
+.view-title{font-weight:900;}
+.view-actions{display:flex; gap:8px; align-items:center;}
+@media (max-width: 980px){
+  .submissions-layout{grid-template-columns:1fr;}
+}
+
+
+/* Navbar right area */
+.nav-right{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.filter-btn{
+  background:#fff;
+  color:#111;
+  border:1px solid #d0d0d0;
+}
+.today-stamp{
+  color:#ddd;
+  font-size:12px;
+  font-weight:600;
+}
+
+/* Modal overlay + modal */
+.modal-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.55);
+  display:flex;
+  align-items:flex-start;
+  justify-content:center;
+  padding:80px 16px 24px;
+  z-index:9999;
+}
+.modal-overlay.hidden{display:none;}
+.modal{
+  width:min(980px, 96vw);
+  background:#fff;
+  border-radius:10px;
+  box-shadow:0 12px 40px rgba(0,0,0,0.35);
+  border:1px solid #d7d7d7;
+  overflow:hidden;
+  /* Ensure the modal scrolls internally instead of the page behind it */
+  display:flex;
+  flex-direction:column;
+  max-height:calc(100vh - 120px);
+}
+
+/* Fullscreen variant for Compare (Last 3 Days) modal */
+#compareModal.modal-overlay{
+  padding:0;
+  align-items:stretch;
+  justify-content:stretch;
+}
+#compareModal .modal{
+  width:100vw;
+  height:100vh;
+  max-height:100vh;
+  border-radius:0;
+  border-left:0;
+  border-right:0;
+  border-top:0;
+  border-bottom:0;
+}
+#compareModal .table-wrap{
+  margin:12px 16px 16px !important;
+}
+
+/* Fullscreen variant for Compare All modal */
+#compareAllModal.modal-overlay{
+  padding:0;
+  align-items:stretch;
+  justify-content:stretch;
+}
+#compareAllModal .modal{
+  width:100vw;
+  height:100vh;
+  max-height:100vh;
+  border-radius:0;
+  border-left:0;
+  border-right:0;
+  border-top:0;
+  border-bottom:0;
+}
+#compareAllModal .table-wrap{
+  margin:12px 16px 16px !important;
+}
+
+
+/* When a modal is open, prevent background page scrolling */
+body.modal-open{
+  overflow:hidden;
+}
+
+/* Let the overlay itself scroll if the modal is taller than the viewport */
+.modal-overlay{
+  overflow:auto;
+}
+
+/* The table area inside the modal should be the scroll container */
+.modal .table-wrap{
+  flex:1;
+  overflow:auto;
+}
+.modal-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:14px 16px;
+  border-bottom:1px solid #e7e7e7;
+}
+.modal-title{
+  font-weight:800;
+  font-size:18px;
+}
+.modal-close{
+  border:1px solid #cfcfcf;
+  background:#fff;
+  padding:6px 12px;
+  border-radius:8px;
+  cursor:pointer;
+}
+.filter-card{
+  margin:12px 16px;
+  padding:12px;
+  border:1px solid #e7e7e7;
+  border-radius:10px;
+  background:#fafafa;
+}
+.filter-section-title{
+  font-weight:800;
+  margin-bottom:8px;
+}
+.filter-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.filter-row label{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-weight:700;
+  font-size:13px;
+}
+.filter-row input[type="date"]{
+  border:1px solid #cfcfcf;
+  border-radius:8px;
+  padding:6px 8px;
+}
+.btn{
+  border:1px solid #cfcfcf;
+  background:#fff;
+  padding:7px 12px;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:700;
+}
+.btn.primary{
+  background:#111;
+  color:#fff;
+  border-color:#111;
+}
+.quick-row{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.pill{
+  border:1px solid #111;
+  background:#fff;
+  padding:8px 14px;
+  border-radius:999px;
+  font-weight:800;
+  cursor:pointer;
+}
+.pill:hover{background:#f1f1f1;}
+.results-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:10px 16px 0;
+}
+.results-title{
+  font-weight:900;
+}
+.results-box{
+  margin:8px 16px 16px;
+  border:1px solid #111;
+  border-radius:10px;
+  overflow:auto;
+  max-height:360px;
+}
+.results-box .empty{
+  padding:12px;
+  color:#333;
+  font-weight:700;
+}
+
+
+/* --- Filtering UI polish --- */
+.pill{background:#f7f7f7; color:#111; border:1px solid #111;}
+.pill:hover{background:#e9e9e9;}
+.pill.active{background:#111; color:#fff;}
+.quick-row .pill{min-width:170px; text-align:center;}
+.modal-overlay{backdrop-filter: blur(1px);}
+
+
+
+/* --- Filter modal buttons (Close / Clear) --- */
+.filter-modal .filter-action-btn,
+.filter-modal button.filter-action-btn,
+#filterCloseBtn,
+#filterClearBtn,
+.filter-close-btn,
+.filter-clear-btn{
+  background:#111;
+  color:#fff;
+  border:1px solid #111;
+  border-radius:10px;
+  padding:8px 14px;
+  font-weight:600;
+  cursor:pointer;
+  transition:all .15s ease-in-out;
+}
+
+.filter-modal .filter-action-btn:hover,
+#filterCloseBtn:hover,
+#filterClearBtn:hover,
+.filter-close-btn:hover,
+.filter-clear-btn:hover{
+  background:#000;
+  border-color:#000;
+}
+
+.filter-modal .filter-action-btn:active,
+#filterCloseBtn:active,
+#filterClearBtn:active,
+.filter-close-btn:active,
+.filter-clear-btn:active{
+  transform:translateY(1px);
+}
+
+/* If you want Close to be outlined (like old UI) uncomment:
+#filterCloseBtn, .filter-close-btn{ background:#fff; color:#111; }
+#filterCloseBtn:hover, .filter-close-btn:hover{ background:#f2f2f2; }
+*/
+
+
+/* Ensure Close/Clear buttons are visible even if HTML has no label (icon-only) */
+#filterCloseBtn::after{
+  content: attr(data-label);
+}
+#filterClearBtn::after{
+  content: attr(data-label);
+}
+#filterCloseBtn, #filterClearBtn{
+  min-width:72px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  background:#111 !important;
+  color:#fff !important;
+  font-weight:600;
+  border:1px solid #111 !important;
+  border-radius:10px;
+  padding:8px 14px;
+  line-height:1;
+  opacity:1 !important;
+  visibility:visible !important;
+}
+#filterCloseBtn:hover, #filterClearBtn:hover{ background:#000 !important; border-color:#000 !important; }
+#filterCloseBtn:focus, #filterClearBtn:focus{ outline:2px solid rgba(0,0,0,.35); outline-offset:2px; }
+
+
+/* Master data quick edit button */
+.master-edit-btn{
+  margin-left:10px;
+  padding:6px 10px;
+  border:1px solid #fff;
+  background:transparent;
+  color:#fff;
+  border-radius:10px;
+  font-weight:700;
+  cursor:pointer;
+  font-size:12px;
+}
+.master-edit-btn:hover{ opacity:0.85; }
+.master-edit-btn.is-editing{ background:#fff; color:#000; }
+
+.cap-input, .conn-input{
+  width:100%;
+  box-sizing:border-box;
+  padding:4px 6px;
+  border:1px solid #999;
+  border-radius:6px;
+  font:inherit;
+  text-align:center;
+}
+
+
+/* All Submissions header actions */
+.head-actions{
+  margin-top:10px;
+  display:flex;
+  justify-content:center;
+  gap:10px;
+}
+
+/* Simple form fields inside modals */
+.field-label{
+  display:block;
+  font-weight:600;
+  margin-bottom:6px;
+}
+.field-input{
+  width:100%;
+  padding:10px 12px;
+  border:1px solid #cfcfcf;
+  border-radius:8px;
+  font-size:14px;
+}
+.field-input:focus{
+  outline:none;
+  border-color:#111;
+}

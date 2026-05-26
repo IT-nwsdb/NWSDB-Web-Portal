@@ -1,0 +1,55 @@
+FIREBASE SETUP GUIDE - LEAK REPAIR STATUS SYSTEM
+
+1. Firebase project used in this system
+   Project ID: nrw-water-leaks
+   Firestore collection: leakRepairStatus
+
+2. Enable Firestore
+   Firebase Console > Firestore Database > Create database
+   Recommended mode: Production mode
+   Select the nearest available region.
+
+3. Enable Anonymous Authentication
+   Firebase Console > Authentication > Sign-in method
+   Enable: Anonymous
+
+4. Publish Firestore rules
+   Firebase Console > Firestore Database > Rules
+   Copy the content from firestore.rules in this folder.
+   Click Publish.
+
+5. Run the system
+   Recommended: use a local web server instead of directly opening the HTML file.
+
+   Option A - VS Code:
+   - Install Live Server extension
+   - Right click index.html
+   - Select Open with Live Server
+
+   Option B - Python:
+   - Open terminal in the project folder
+   - Run: python -m http.server
+   - Open: http://localhost:8000
+
+6. Database behaviour
+   - Save Changes writes the edited cells to Firestore.
+   - Opening a sheet loads previously saved cells from Firestore.
+   - Clear Saved deletes that sheet's saved Firestore document.
+   - The Download CSV feature has been removed.
+   - Browser localStorage is no longer used for saving sheet data.
+
+7. Firestore document format
+   Collection: leakRepairStatus
+   Document ID format: REGIONID__SHEETNAME, sanitized for Firestore.
+
+   Main fields:
+   - docId
+   - regionId
+   - regionName
+   - sheetName
+   - sheetType
+   - maxRows
+   - maxCols
+   - savedAt
+   - savedAtClient
+   - cells

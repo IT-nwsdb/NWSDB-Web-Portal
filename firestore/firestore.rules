@@ -1,0 +1,98 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() { return request.auth != null; }
+    function isAdmin() { return request.auth != null && request.auth.token.admin == true; }
+
+    // HRM
+    match /hrmSheets/{docId} { allow read, write: if isSignedIn(); }
+
+    // SCHEME (no month checks at all)
+    match /schemeExtended/{docId} {
+      allow read, write: if isSignedIn();
+    }
+
+    // LABS
+    match /labsSubmissions/{docId} { allow read, write: if isSignedIn(); }
+
+    // PLANT
+    match /plantSubmissions/{docId} { allow read, write: if isSignedIn(); }
+
+    // UTILITIES (generic)
+    match /utilities/{docId} {
+      allow create: if isSignedIn();
+      allow read, update, delete: if false;
+    }
+
+    // UTILITIES -> BillingConfig -> billingMonths
+    match /utilities/BillingConfig/billingMonths/{monthId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ADMIN
+    match /adminConfig/{docId} { allow read, write: if isSignedIn(); }
+
+    // DASHBOARD
+
+    // Leak Repair Status System
+    function validLeakRepairDocument(docId) {
+      return request.resource.data.keys().hasOnly([
+          'docId',
+          'regionId',
+          'regionName',
+          'sheetName',
+          'sheetType',
+          'maxRows',
+          'maxCols',
+          'savedAt',
+          'savedAtClient',
+          'cells'
+        ])
+        && request.resource.data.docId == docId
+        && request.resource.data.regionId in [
+          'CENTRAL_SOUTH',
+          'CENTRAL_EAST',
+          'MATALE',
+          'CENTRAL_NORTH'
+        ]
+        && request.resource.data.regionName is string
+        && request.resource.data.sheetName is string
+        && request.resource.data.sheetType in ['location', 'summary']
+        && request.resource.data.maxRows is int
+        && request.resource.data.maxRows >= 0
+        && request.resource.data.maxRows <= 10000
+        && request.resource.data.maxCols is int
+        && request.resource.data.maxCols >= 0
+        && request.resource.data.maxCols <= 200
+        && request.resource.data.savedAt is timestamp
+        && request.resource.data.savedAtClient is string
+        && request.resource.data.cells is map
+        && request.resource.data.cells.size() <= 10000;
+    }
+
+    match /leakRepairStatus/{docId} {
+      allow read: if isSignedIn();
+      allow create, update: if isSignedIn() && validLeakRepairDocument(docId);
+      allow delete: if isSignedIn();
+    }
+
+    match /dashboardStats/{docId} {
+      allow read: if true;
+      allow write: if isSignedIn();
+    }
+
+    // USERS
+    match /users/{userId} { allow read, write: if request.auth.uid == userId; }
+
+    // REGIONS
+    match /regions/{regionId} {
+      allow read: if true;
+      allow write: if isSignedIn();
+    }
+
+    // DENY BY DEFAULT
+    match /{document=**} { allow read, write: if false; }
+  }
+}

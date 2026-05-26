@@ -1,0 +1,2035 @@
+<!-- index.html (updated with HRM page + RSC(C) dedicated sheet page + CE (NRW) page) -->
+<!DOCTYPE html>
+
+<html data-bs-theme="light" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NWSDB Web Portal</title>
+<!-- Color mode init (prevents flash of wrong theme) -->
+<script>
+    // Initialize global variables if they don't exist
+  if (typeof window.PUBLIC_PLANT_MAP === 'undefined') window.PUBLIC_PLANT_MAP = null;
+  if (typeof window.PUBLIC_PLANT_MARKERS === 'undefined') window.PUBLIC_PLANT_MARKERS = [];
+  if (typeof window.CURRENT_GALLERY === 'undefined') {
+    window.CURRENT_GALLERY = {
+      plantMeta: { region: null, location: null },
+      photos: [],
+      currentIndex: 0
+    };
+  }
+    (function () {
+      try {
+        const saved = localStorage.getItem('nwsdb_theme');
+        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const theme = saved || (prefersDark ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-bs-theme', theme);
+      } catch (_) {}
+    })();
+  </script>
+<!-- Preconnect (perf) -->
+<link href="https://cdn.jsdelivr.net" rel="preconnect"/>
+<link href="https://cdnjs.cloudflare.com" rel="preconnect"/>
+<!-- Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" onerror="console.warn('CDN failed: stylesheet')" />
+<!-- Font Awesome -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet" onerror="console.warn('CDN failed: stylesheet')" />
+<link href="style.css" rel="stylesheet"/>
+<style>
+
+/* ===== HRM Fullscreen Overlay ===== */
+.hrm-overlay{
+  position:fixed; inset:0;
+  z-index:9999;
+  background:rgba(0,0,0,.55);
+  backdrop-filter: blur(4px);
+  display:flex;
+  flex-direction:column;
+}
+.hrm-overlay-header{
+  height:64px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 16px;
+  background: rgba(255,255,255,.92);
+  border-bottom:1px solid rgba(0,0,0,.08);
+}
+.hrm-overlay-title{
+  display:flex; align-items:center; gap:10px;
+  font-weight:700;
+  font-size:16px;
+}
+.hrm-badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  height:28px;
+  padding:0 10px;
+  border-radius:999px;
+  background:#111827;
+  color:#fff;
+  font-size:12px;
+  letter-spacing:.5px;
+}
+.hrm-overlay-actions{
+  display:flex; align-items:center; gap:10px;
+}
+.hrm-btn{
+  height:36px;
+  padding:0 14px;
+  border-radius:10px;
+  border:1px solid rgba(0,0,0,.12);
+  cursor:pointer;
+  font-weight:600;
+  font-size:13px;
+}
+.hrm-btn-primary{
+  background:#111827;
+  color:#fff;
+  border-color:#111827;
+}
+.hrm-btn-secondary{
+  background:#fff;
+  color:#111827;
+}
+.hrm-overlay-body{
+  flex:1;
+  position:relative;
+  background:#fff;
+}
+.hrm-overlay-frame{
+  width:100%;
+  height:100%;
+  border:0;
+  display:block;
+}
+.hrm-loader{
+  position:absolute;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(to bottom, rgba(255,255,255,.9), rgba(255,255,255,.98));
+  font-weight:700;
+}
+.hrm-spinner{
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  border:4px solid rgba(17,24,39,.15);
+  border-top-color:#111827;
+  animation: hrmSpin 1s linear infinite;
+}
+@keyframes hrmSpin{ to{ transform:rotate(360deg);} }
+/* Mobile tweaks */
+@media (max-width: 768px){
+  .hrm-overlay-header{ height:56px; padding:0 12px;}
+  .hrm-btn{ height:34px; padding:0 12px; border-radius:12px;}
+}
+
+
+/* Clickability patch for Bulk Add button and overlays */
+#bulkAddBtn, .bulk-add-btn { position: relative; z-index: 1002; pointer-events: auto; }
+.modal-backdrop, .spinner-overlay, .loading-overlay, .page-overlay, .toast-container, .blocker { pointer-events: none !important; }
+.bulk-panel, .category-panel { position: relative; pointer-events: auto; }
+</style>
+</head>
+<body>
+<!-- Skip to content (a11y) -->
+<a class="skip-link" href="#main-content">Skip to content</a>
+<!-- Public Top Navbar -->
+<nav class="navbar navbar-expand-lg bg-body border-bottom sticky-top" id="public-nav">
+<div class="container">
+<a class="navbar-brand d-flex align-items-center gap-2" href="#">
+<img alt="NWSDB logo" class="me-1" decoding="async" fetchpriority="high" loading="eager" src="assets/Water Board Logo.png" style="height:28px;width:auto;display:block"/>
+<span class="fw-semibold">NWSDB</span>
+</a>
+<button aria-label="Toggle navigation" class="navbar-toggler" data-bs-target="#publicNavMenu" data-bs-toggle="collapse" type="button">
+<span class="navbar-toggler-icon"></span>
+</button>
+<div class="collapse navbar-collapse" id="publicNavMenu">
+<ul class="navbar-nav me-auto">
+<li class="nav-item">
+<a aria-current="page" aria-label="Home" class="nav-link active" href="#" id="lp-home-link" title="Home">
+<i class="fa-solid fa-house"></i>
+</a>
+</li>
+<li class="nav-item">
+<a aria-label="About" class="nav-link" data-bs-target="#aboutModal" data-bs-toggle="modal" href="#" id="lp-about-link" title="About">
+<i class="fa-solid fa-circle-info"></i>
+</a>
+</li>
+</ul>
+<button aria-label="Toggle theme" class="btn btn-outline-secondary ms-2" id="themeTogglePublic" title="Toggle theme" type="button">
+<i class="fa-solid fa-moon"></i>
+</button>
+<button aria-label="Developer options" class="btn btn-outline-warning ms-2" id="openAdminBtnPublic" title="Developer options" type="button">
+<i class="fa-solid fa-user-gear"></i>
+</button>
+<button class="btn btn-primary ms-2" data-bs-target="#loginModal" data-bs-toggle="modal" id="openLoginBtn" type="button">
+<i class="fa-solid fa-right-to-bracket me-1"></i> Login
+        </button>
+</div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const btn = document.getElementById('btnViewPlants');
+  const overlay = document.getElementById('plantOverlay');
+  const frame = document.getElementById('plantOverlayFrame');
+  const closeBtn = document.getElementById('closePlantOverlay');
+
+  function openOverlay(src, title){
+    if(!overlay) return false;
+    const overlayTitle = overlay.querySelector('.plant-overlay-title');
+    if (overlayTitle && title) overlayTitle.textContent = title;
+    if(frame && src) frame.src = src;
+    overlay.style.display = 'flex';
+    document.body.classList.add('plant-overlay-open');
+    return true;
+  }
+
+  function closeOverlay(){
+    if(!overlay) return;
+    overlay.style.display = 'none';
+    document.body.classList.remove('plant-overlay-open');
+  }
+
+  const plantChoiceModalEl = document.getElementById('plantChoiceModal');
+  const waterQualityBtn = document.getElementById('btnPlantWaterQuality');
+  const plantPlaceholderBtn = document.getElementById('btnPlantPlaceholder');
+  const waterQualityUrl = 'water-quality-system/index.html';
+  const plantSystemUrl = 'plant-system/index.html';
+  let plantChoiceModal = null;
+
+  function getPlantChoiceModal(){
+    if(!plantChoiceModalEl || !window.bootstrap) return null;
+    plantChoiceModal = plantChoiceModal || new bootstrap.Modal(plantChoiceModalEl, { backdrop: true, keyboard: true });
+    return plantChoiceModal;
+  }
+
+  btn?.addEventListener('click', function(e){
+    e.preventDefault();
+    const modal = getPlantChoiceModal();
+    if(modal){
+      modal.show();
+    } else {
+      // Fallback if Bootstrap fails to load.
+      window.location.href = waterQualityUrl;
+    }
+  });
+
+  waterQualityBtn?.addEventListener('click', function(e){
+    e.preventDefault();
+    getPlantChoiceModal()?.hide();
+    window.location.href = waterQualityUrl;
+  });
+
+  plantPlaceholderBtn?.addEventListener('click', function(e){
+    e.preventDefault();
+    getPlantChoiceModal()?.hide();
+    const opened = openOverlay(plantSystemUrl, 'Water Treatment Plant Details');
+    if(!opened){
+      const newTab = window.open(plantSystemUrl, '_blank', 'noopener,noreferrer');
+      if (newTab) newTab.opener = null;
+    }
+  });
+
+  closeBtn?.addEventListener('click', function(e){
+    e.preventDefault();
+    closeOverlay();
+  });
+
+  overlay?.addEventListener('click', function(e){
+    if(e.target === overlay) closeOverlay();
+  });
+});
+</script>
+
+</nav>
+<!-- Public Landing Page -->
+<section id="landing-page">
+<div class="dashboard-header">
+<div class="container text-center">
+<h1 class="display-5 fw-bold">Welcome to RSC Central Web Portal</h1>
+<p class="lead mb-0">Explore summary insights. Login to submit and manage data.</p>
+</div>
+</div>
+<div class="container my-4" id="main-content" role="main">
+<!-- KPIs -->
+<div class="row g-3 mb-3">
+<div class="col-md-3">
+<div class="kpi-card">
+<div class="kpi-title">Total Submissions</div>
+<div aria-live="polite" class="kpi-value" id="lp-kpi-total">0</div>
+</div>
+</div>
+<div class="col-md-3">
+<div class="kpi-card">
+<div class="kpi-title">Schemes</div>
+<div aria-live="polite" class="kpi-value" id="lp-kpi-scheme">0</div>
+</div>
+</div>
+<div class="col-md-3">
+<div class="kpi-card">
+<div class="kpi-title">Plants</div>
+<div aria-live="polite" class="kpi-value" id="lp-kpi-plant">0</div>
+</div>
+</div>
+<div class="col-md-3">
+<div class="kpi-card">
+<div class="kpi-title">Labs</div>
+<div aria-live="polite" class="kpi-value" id="lp-kpi-labs">0</div>
+</div>
+</div>
+</div>
+<!-- Charts -->
+<div class="card border-0 shadow-sm">
+<div class="card-body">
+<div class="row g-4 justify-content-center">
+<div class="col-lg-4">
+<h6 class="text-muted">Submission Share</h6>
+<div class="chart-container">
+<canvas id="lp-chart-share"></canvas>
+</div>
+</div>
+<div class="col-lg-4">
+<h6 class="text-muted">Submissions (Last 6 Months)</h6>
+<div class="chart-container">
+<canvas id="lp-chart-monthly"></canvas>
+</div>
+</div>
+<div class="col-lg-4">
+<h6 class="text-muted">Coverage by Region</h6>
+<div class="chart-container">
+<canvas id="lp-chart-region"></canvas>
+</div>
+</div>
+</div>
+
+
+<div class="alert alert-info d-none mt-3" id="lp-charts-unavailable">
+<i class="fa-solid fa-circle-info me-1"></i>
+            Charts unavailable (Chart.js not loaded). Connect to internet to load charts.
+          </div>
+</div>
+</div>
+<!-- Plant Locations Map -->
+<div class="container my-4">
+
+</div>
+</div>
+</section>
+<!-- App Shell (hidden until logged in) -->
+<div id="app-shell" style="display: none;">
+<nav class="navbar navbar-expand-lg bg-body border-bottom sticky-top">
+<div class="container">
+<a class="navbar-brand d-flex align-items-center gap-2" href="#" onclick="showHomePage()">
+<img alt="NWSDB logo" class="me-1" decoding="async" fetchpriority="high" loading="eager" src="assets/Water Board Logo.png" style="height:28px;width:auto;display:block"/>
+<span class="fw-semibold">NWSDB</span>
+</a>
+<button aria-label="Toggle navigation" class="navbar-toggler" data-bs-target="#navbarNav" data-bs-toggle="collapse" type="button">
+<span class="navbar-toggler-icon"></span>
+</button>
+<div class="collapse navbar-collapse" id="navbarNav">
+<ul class="navbar-nav me-auto">
+<li class="nav-item">
+<a aria-current="page" aria-label="Home" class="nav-link active" href="#" onclick="showHomePage()" title="Home">
+<i class="fa-solid fa-house"></i>
+</a>
+</li>
+<li class="nav-item">
+<a aria-label="About" class="nav-link" data-bs-target="#aboutModal" data-bs-toggle="modal" href="#" title="About">
+<i class="fa-solid fa-circle-info"></i>
+</a>
+</li>
+<li class="nav-item">
+<a aria-label="Submissions" class="nav-link" href="#" onclick="showSubmissionsPage()" title="Submissions">
+<i aria-hidden="true" class="fa-solid fa-file-circle-check me-1"></i>
+</a>
+</li>
+
+</ul>
+<button aria-label="Developer options" class="btn btn-outline-warning me-2" id="openAdminBtnApp" title="Developer options" type="button">
+<i class="fa-solid fa-user-gear"></i>
+</button>
+<button aria-label="Toggle theme" class="btn btn-outline-secondary me-2" id="themeToggleApp" title="Toggle theme" type="button">
+<i class="fa-solid fa-moon"></i>
+</button>
+<button class="btn btn-outline-danger" id="logoutBtn" type="button">
+<i class="fa-solid fa-right-from-bracket me-1"></i> Logout
+          </button>
+</div>
+</div>
+</nav>
+<!-- Home Page -->
+<div id="home-page">
+<div class="dashboard-header">
+<div class="container text-center">
+<h1 class="display-4 fw-bold">NWSDB Dashboard</h1>
+<p class="lead">National Water Supply and Drainage Board Web Portal</p>
+</div>
+</div>
+<div class="container" role="main">
+<div class="row g-4 justify-content-center">
+<!-- Scheme -->
+<div class="col-md-6 col-xl-3">
+<div class="dashboard-card text-center p-4">
+<div class="dashboard-icon"><i class="fa-solid fa-sitemap"></i></div>
+<h3 class="card-title">Scheme</h3>
+<p class="card-text">Browse water supply schemes and key statistics.</p>
+<div class="dropdown mt-3" id="schemeDropdownWrap">
+  <button class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" type="button">Explore Schemes</button>
+  <ul class="dropdown-menu" id="scheme-region-menu"></ul>
+</div>
+<button class="btn btn-outline-primary mt-3 d-none" id="schemeAddDataBtn" type="button">
+  <i class="fa-solid fa-plus me-1"></i> ADD Data
+</button>
+</div>
+</div>
+<!-- Plant -->
+<div class="col-md-6 col-xl-3">
+<div class="dashboard-card text-center p-4">
+<div class="dashboard-icon"><i class="fa-solid fa-industry"></i></div>
+<h3 class="card-title">Plant</h3>
+<p class="card-text">View treatment plants, capacity, and details.</p>
+<div class="mt-3">
+<button class="btn btn-outline-primary" type="button" id="btnViewPlants">View Plants</button>
+</div>
+</div>
+</div>
+<!-- Development Works -->
+<div class="col-md-6 col-xl-3">
+<div class="dashboard-card text-center p-4">
+<div class="dashboard-icon"><i class="fa-solid fa-code-branch"></i></div>
+<h3 class="card-title">Development Works</h3>
+<p class="card-text">Track ongoing and planned development initiatives.</p>
+<button class="btn btn-outline-primary mt-3" type="button" id="btnViewProjects">View Projects</button>
+</div>
+</div>
+<!-- Project Progress Monitoring -->
+<div class="col-md-6 col-xl-3">
+<div class="dashboard-card text-center p-4">
+<div class="dashboard-icon"><i class="fa-solid fa-chart-line"></i></div>
+<h3 class="card-title">Project Progress Monitoring</h3>
+<p class="card-text">Monitor progress updates and key milestones for projects.</p>
+<button class="btn btn-outline-primary mt-3" type="button" id="btnViewProgressProjects">View Progress Projects</button>
+</div>
+</div>
+<!-- HRM -->
+<div class="col-md-6 col-xl-3">
+<div class="dashboard-card text-center p-4">
+<div class="dashboard-icon"><i class="fa-solid fa-users"></i></div>
+<h3 class="card-title">HRM</h3>
+<p class="card-text">Human Resource Management info.</p>
+<button class="btn btn-outline-primary mt-3" type="button" id="btnGoHRM">Go to HRM</button>
+</div>
+</div>
+<!-- NRW -->
+<div class="col-md-6 col-xl-3">
+<div class="dashboard-card text-center p-4">
+<div class="dashboard-icon"><i class="fa-solid fa-droplet"></i></div>
+<h3 class="card-title">NRW</h3>
+<p class="card-text">Open the Non-Revenue Water (NRW) module.</p>
+<button class="btn btn-outline-primary mt-3" type="button" id="btnOpenNRW" title="Open NRW portal">Open NRW</button>
+</div>
+</div>
+<!-- Overall Commercial Performance -->
+<div class="col-md-6 col-xl-3">
+<div class="dashboard-card text-center p-4">
+<div class="dashboard-icon"><i class="fa-solid fa-chart-line"></i></div>
+<h3 class="card-title">Overall Commercial Performance</h3>
+<p class="card-text">Open the commercial performance monitoring module.</p>
+<div class="mt-3">
+<button class="btn btn-outline-primary" type="button" id="btnOpenCommercial">Open Commercial</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Contact Us -->
+<div id="contact-page" style="display: none;">
+<div class="contact-header">
+<div class="container text-center">
+<h1 class="display-4 fw-bold">Contact Us</h1>
+<p class="lead">Get in touch with the National Water Supply and Drainage Board</p>
+</div>
+</div>
+<div class="container"></div>
+</div>
+<!-- About Us -->
+<div id="about-page" style="display: none;">
+<div class="dashboard-header">
+<div class="container text-center">
+<h1 class="display-4 fw-bold">About Us</h1>
+<p class="lead">Central Regional Support Center (RSC)</p>
+</div>
+</div>
+<div class="container mt-4">
+<div class="welcome-section">
+<h2 class="mb-4">Welcome to Central Regional Support Center</h2>
+<div class="about-section">
+<h3 class="section-title">About Central RSC</h3>
+<p>The Central RSC, operational since 1987, is a pioneering center within NWSDB's decentralized network, managing four regions and critical O&amp;M functions.</p>
+</div>
+<div class="mt-4">
+<h3 class="section-title">Key Functions</h3>
+<ul class="list-group list-group-flush">
+<li class="list-group-item">Planning/design of projects</li>
+<li class="list-group-item">Large-scale project planning</li>
+<li class="list-group-item">Rehabilitation/augmentation</li>
+<li class="list-group-item">Billing and revenue collection</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<!-- Map Page -->
+
+<!-- HRM Page (Sheets selection) -->
+<div id="hrm-page" style="display: none;">
+<div class="dashboard-header">
+<div class="container text-center">
+<h1 class="display-4 fw-bold">HRM</h1>
+<p class="lead">Sheets</p>
+</div>
+</div>
+<div class="container my-4" id="hrm-main" role="main">
+<div class="card border-0 shadow-sm">
+<div class="card-body">
+<!-- Tabs (RSC(C) navigates to a new page) -->
+<ul class="nav nav-tabs flex-wrap" id="hrmTabs" role="tablist">
+<li class="nav-item" role="presentation">
+<button aria-controls="hrm-summary" aria-selected="true" class="nav-link active" data-bs-target="#hrm-summary" data-bs-toggle="tab" id="hrm-tab-summary" role="tab" type="button">SUMMARY</button>
+</li>
+<li class="nav-item" role="presentation">
+<!-- Navigate to new page -->
+<button class="nav-link" id="hrm-tab-rsc-c" onclick="showHRMRSCPage()" type="button">RSC(C)</button>
+</li>
+<li class="nav-item" role="presentation">
+<button class="nav-link" id="hrm-tab-m-kcwtp" onclick="showHRMKCWTPPage()" type="button">M (KCWTP)</button>
+</li>
+<li class="nav-item" role="presentation">
+<!-- Navigate to new page -->
+<button class="nav-link" id="hrm-tab-ce-nrw" onclick="showHRMCENRWPage()" type="button">CE (NRW)</button>
+</li>
+<li class="nav-item" role="presentation">
+<button aria-controls="hrm-m-prod" aria-selected="false" class="nav-link" data-bs-target="#hrm-m-prod" data-bs-toggle="tab" id="hrm-tab-m-prod" role="tab" type="button">M(PROD)</button>
+</li>
+<li class="nav-item" role="presentation">
+<button aria-controls="hrm-ce-me-matale" aria-selected="false" class="nav-link" data-bs-target="#hrm-ce-me-matale" data-bs-toggle="tab" id="hrm-tab-ce-me-matale" role="tab" type="button">CE (ME-MATALE)</button>
+</li>
+<li class="nav-item" role="presentation">
+<button aria-controls="hrm-m-m" aria-selected="false" class="nav-link" data-bs-target="#hrm-m-m" data-bs-toggle="tab" id="hrm-tab-m-m" role="tab" type="button">M(M)</button>
+</li>
+<li class="nav-item" role="presentation">
+<button aria-controls="hrm-m-ce" aria-selected="false" class="nav-link" data-bs-target="#hrm-m-ce" data-bs-toggle="tab" id="hrm-tab-m-ce" role="tab" type="button">M(CE)</button>
+</li>
+<li class="nav-item" role="presentation">
+<button aria-controls="hrm-m-cn" aria-selected="false" class="nav-link" data-bs-target="#hrm-m-cn" data-bs-toggle="tab" id="hrm-tab-m-cn" role="tab" type="button">M(CN)</button>
+</li>
+<li class="nav-item" role="presentation">
+<button aria-controls="hrm-m-cs" aria-selected="false" class="nav-link" data-bs-target="#hrm-m-cs" data-bs-toggle="tab" id="hrm-tab-m-cs" role="tab" type="button">M(CS)</button>
+</li>
+</ul>
+<!-- Tab panes (empty by request except SUMMARY placeholder) -->
+<div class="tab-content pt-3" id="hrmTabsContent" style="min-height: 50vh;">
+<div aria-labelledby="hrm-tab-summary" class="tab-pane fade show active" id="hrm-summary" role="tabpanel">
+<div class="d-flex justify-content-end gap-2 mt-3">
+  <button class="btn btn-outline-secondary hrm-save-btn" data-sheet="SUMMARY" type="button">
+    <i class="fa-solid fa-floppy-disk me-1"></i> Save SUMMARY
+  </button>
+</div>
+</div>
+<div aria-labelledby="hrm-tab-m-kcwtp" class="tab-pane fade" id="hrm-m-kcwtp" role="tabpanel">
+<div class="d-flex justify-content-end gap-2 mt-3">
+  <button class="btn btn-outline-secondary hrm-save-btn" data-sheet="M_KCWTP" type="button">
+    <i class="fa-solid fa-floppy-disk me-1"></i> Save M_KCWTP
+  </button>
+</div>
+</div>
+<div aria-labelledby="hrm-tab-ce-nrw" class="tab-pane fade" id="hrm-ce-nrw" role="tabpanel">
+<div class="d-flex justify-content-end gap-2 mt-3">
+  <button class="btn btn-outline-secondary hrm-save-btn" data-sheet="CE_NRW" type="button">
+    <i class="fa-solid fa-floppy-disk me-1"></i> Save CE_NRW
+  </button>
+</div>
+</div>
+<div aria-labelledby="hrm-tab-m-prod" class="tab-pane fade" id="hrm-m-prod" role="tabpanel">
+<div class="d-flex justify-content-end gap-2 mt-3">
+  <button class="btn btn-outline-secondary hrm-save-btn" data-sheet="M_PROD" type="button">
+    <i class="fa-solid fa-floppy-disk me-1"></i> Save M_PROD
+  </button>
+</div>
+</div>
+<div aria-labelledby="hrm-tab-ce-me-matale" class="tab-pane fade" id="hrm-ce-me-matale" role="tabpanel">
+<div class="d-flex justify-content-end gap-2 mt-3">
+  <button class="btn btn-outline-secondary hrm-save-btn" data-sheet="CE_ME_MATALE" type="button">
+    <i class="fa-solid fa-floppy-disk me-1"></i> Save CE_ME_MATALE
+  </button>
+</div>
+</div>
+<div aria-labelledby="hrm-tab-m-m" class="tab-pane fade" id="hrm-m-m" role="tabpanel">
+<div class="d-flex justify-content-end gap-2 mt-3">
+  <button class="btn btn-outline-secondary hrm-save-btn" data-sheet="M_M" type="button">
+    <i class="fa-solid fa-floppy-disk me-1"></i> Save M_M
+  </button>
+</div>
+</div>
+<div aria-labelledby="hrm-tab-m-ce" class="tab-pane fade" id="hrm-m-ce" role="tabpanel">
+<div class="d-flex justify-content-end gap-2 mt-3">
+  <button class="btn btn-outline-secondary hrm-save-btn" data-sheet="M_CE" type="button">
+    <i class="fa-solid fa-floppy-disk me-1"></i> Save M_CE
+  </button>
+</div>
+</div>
+<div aria-labelledby="hrm-tab-m-cn" class="tab-pane fade" id="hrm-m-cn" role="tabpanel">
+<div class="d-flex justify-content-end gap-2 mt-3">
+  <button class="btn btn-outline-secondary hrm-save-btn" data-sheet="M_CN" type="button">
+    <i class="fa-solid fa-floppy-disk me-1"></i> Save M_CN
+  </button>
+</div>
+</div>
+<div aria-labelledby="hrm-tab-m-cs" class="tab-pane fade" id="hrm-m-cs" role="tabpanel">
+<div class="d-flex justify-content-end gap-2 mt-3">
+  <button class="btn btn-outline-secondary hrm-save-btn" data-sheet="M_CS" type="button">
+    <i class="fa-solid fa-floppy-disk me-1"></i> Save M_CS
+  </button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- HRM RSC(C) Page (RSC (New) sheet template) -->
+<div id="hrm-rsc-page" style="display: none;">
+<div class="dashboard-header">
+<div class="container text-center">
+<h1 class="display-4 fw-bold">HRM</h1>
+<p class="lead">RSC (New) — Staff Cadre Management</p>
+</div>
+</div>
+<div class="container my-4" id="hrm-rsc-main" role="main">
+<div class="d-flex justify-content-between align-items-center mb-3">
+<button class="btn btn-outline-secondary" onclick="window.open('https://it-nwsdb.github.io/HRM/','_blank','noopener')" type="button">
+<i class="fa-solid fa-arrow-left me-1"></i> Back
+          </button>
+<div class="d-flex flex-wrap gap-2">
+<input class="form-control" id="hrm-rsc-region-input" placeholder="Region Name" style="min-width: 180px;"/>
+<input class="form-control" id="hrm-rsc-zone-input" placeholder="Manager Zone" style="min-width: 180px;"/>
+<input class="form-control" id="hrm-rsc-connections-input" placeholder="No: of Connection" style="min-width: 180px;"/>
+<input class="form-control" id="hrm-rsc-capacity-input" placeholder="Plant Capacity" style="min-width: 180px;"/>
+</div>
+</div>
+<div class="card border-0 shadow-sm">
+<div class="card-body">
+<style>
+              /* Spreadsheet-like table look for the RSC (New) sheet */
+              #hrm-rsc-table {
+                border-collapse: collapse;
+                width: 100%;
+                table-layout: fixed;
+                font-size: 0.95rem;
+              }
+              #hrm-rsc-table th, #hrm-rsc-table td {
+                border: 1px solid rgba(0,0,0,0.2);
+                padding: .35rem .4rem;
+                vertical-align: middle;
+              }
+              #hrm-rsc-table th {
+                font-weight: 600;
+                text-align: center;
+              }
+              #hrm-rsc-title {
+                font-weight: 700;
+                text-align: left;
+                white-space: pre-line;
+              }
+              .hrm-num { text-align: right; }
+              .hrm-readonly { background: var(--bs-tertiary-bg, #f8f9fa); }
+              .hrm-total-row td, .hrm-total-row th {
+                font-weight: 700;
+                background: var(--bs-light, #f8f9fa);
+              }
+              .hrm-col-small { width: 60px; }
+              .hrm-col-med { width: 180px; }
+            </style>
+<div id="hrm-rsc-grid">
+<table aria-label="RSC (New) Staff Cadre Template" id="hrm-rsc-table">
+<!-- JS builds full sheet: A1:M1 title, header rows, 46 rows, and totals -->
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- HRM KCWTP Page (Kandy City Wastewater Treatment Plant) -->
+<div id="hrm-kcwtp-page" style="display: none;">
+<div class="dashboard-header">
+<div class="container text-center">
+<h1 class="display-4 fw-bold">HRM</h1>
+<p class="lead">M (KCWTP) — Kandy City Wastewater Treatment Plant Staff Planning</p>
+</div>
+</div>
+<div class="container my-4" id="hrm-kcwtp-main" role="main">
+<div class="d-flex justify-content-between align-items-center mb-3">
+<button class="btn btn-outline-secondary" onclick="window.open('https://it-nwsdb.github.io/HRM/','_blank','noopener')" type="button">
+<i class="fa-solid fa-arrow-left me-1"></i> Back to HRM
+          </button>
+<div class="d-flex flex-wrap gap-2">
+<input class="form-control" id="hrm-kcwtp-connection-input" placeholder="Role of Connection" style="min-width: 200px;"/>
+<input class="form-control" id="hrm-kcwtp-capacity-input" placeholder="Plant Capacity" style="min-width: 200px;"/>
+</div>
+<button class="btn btn-primary" onclick="window.print()">
+<i class="fa-solid fa-print me-1"></i> Print
+          </button>
+</div>
+<div class="card border-0 shadow-sm">
+<div class="card-body">
+<style>
+              /* Spreadsheet-like table look for KCWTP sheet */
+              #hrm-kcwtp-table {
+                border-collapse: collapse;
+                width: 100%;
+                table-layout: fixed;
+                font-size: 0.95rem;
+              }
+              #hrm-kcwtp-table th, #hrm-kcwtp-table td {
+                border: 1px solid rgba(0,0,0,0.2);
+                padding: .35rem .4rem;
+                vertical-align: middle;
+              }
+              #hrm-kcwtp-table th {
+                font-weight: 600;
+                text-align: center;
+                background-color: #e9ecef;
+              }
+              #hrm-kcwtp-title {
+                font-weight: 700;
+                text-align: center;
+                white-space: pre-line;
+                background-color: #f8f9fa;
+              }
+              .kcwtp-input {
+                text-align: center;
+                border: 1px solid #dee2e6;
+              }
+            </style>
+<div id="hrm-kcwtp-grid">
+<table aria-label="Kandy City Wastewater Treatment Plant Staff Planning" id="hrm-kcwtp-table">
+<!-- JS builds full sheet with header, 13 designations, and totals -->
+</table>
+</div>
+<!-- Instructions -->
+<div class="mt-4 p-3 bg-light rounded">
+<h6 class="mb-2">Instructions:</h6>
+<ul class="small mb-0">
+<li>Fill in the header information above</li>
+<li>Enter numerical values in the input fields</li>
+<li>Calculations are automatic: E = B+C+D, H = F+G, I = H-E</li>
+<li>Totals are calculated automatically at the bottom</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- HRM CE (NRW) Page (Chief Engineer Non-Revenue Water) -->
+<div id="hrm-ce-nrw-page" style="display: none;">
+<div class="dashboard-header">
+<div class="container text-center">
+<h1 class="display-4 fw-bold">HRM</h1>
+<p class="lead">CE (NRW) — Chief Engineer Non-Revenue Water Staff Planning</p>
+</div>
+</div>
+<div class="container my-4" id="hrm-ce-nrw-main" role="main">
+<div class="d-flex justify-content-between align-items-center mb-3">
+<button class="btn btn-outline-secondary" onclick="window.open('https://it-nwsdb.github.io/HRM/','_blank','noopener')" type="button">
+<i class="fa-solid fa-arrow-left me-1"></i> Back to HRM
+          </button>
+<div class="d-flex flex-wrap gap-2">
+<input class="form-control" id="hrm-ce-nrw-year-input" placeholder="Year onwards (e.g., 2025)" style="min-width: 200px;"/>
+</div>
+<button class="btn btn-primary" onclick="window.print()">
+<i class="fa-solid fa-print me-1"></i> Print
+          </button>
+</div>
+<div class="card border-0 shadow-sm">
+<div class="card-body">
+<style>
+              /* Spreadsheet-like table look for CE NRW sheet */
+              #hrm-ce-nrw-table {
+                border-collapse: collapse;
+                width: 100%;
+                table-layout: fixed;
+                font-size: 0.95rem;
+              }
+              #hrm-ce-nrw-table th, #hrm-ce-nrw-table td {
+                border: 1px solid rgba(0,0,0,0.3);
+                padding: .4rem .5rem;
+                vertical-align: middle;
+              }
+              #hrm-ce-nrw-table th {
+                font-weight: 600;
+                text-align: center;
+                background-color: #e9ecef;
+              }
+              #hrm-ce-nrw-title {
+                font-weight: 700;
+                text-align: center;
+                white-space: pre-line;
+                background-color: #f8f9fa;
+                font-size: 16px;
+              }
+              .ce-nrw-input {
+                text-align: center;
+                border: 1px solid #dee2e6;
+                width: 100%;
+              }
+              .ce-nrw-readonly {
+                background-color: #f8f9fa;
+                font-weight: 500;
+                text-align: center;
+              }
+              .ce-nrw-total-row {
+                background-color: #dee2e6;
+                font-weight: bold;
+              }
+            </style>
+<div id="hrm-ce-nrw-grid">
+<table aria-label="Chief Engineer Non-Revenue Water Staff Planning" id="hrm-ce-nrw-table">
+<!-- JS builds full sheet with header, designations, and totals -->
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Data Entry (Scheme) -->
+<div id="data-entry-page" style="display: none;">
+<div class="dashboard-header">
+<div class="container text-center">
+<h1 class="display-4 fw-bold">Data Entry Form</h1>
+<p class="lead">Enter details for the selected location</p>
+</div>
+</div>
+<div class="container my-4">
+<div class="card border-0 shadow-sm mb-4">
+<div class="card-body d-flex justify-content-between">
+<div>
+<div class="text-muted small">Selected Region</div>
+<div class="fw-semibold" id="def-region">-</div>
+</div>
+<div>
+<div class="text-muted small">Selected Location</div>
+<div class="fw-semibold" id="def-location">-</div>
+</div>
+<div>
+<button class="btn btn-outline-secondary" onclick="showHomePage()" type="button">
+<i class="fa-solid fa-arrow-left me-1"></i> Back
+              </button>
+</div>
+</div>
+</div>
+<!-- Connection Categories -->
+<div class="card border-0 shadow-sm mb-4">
+<div class="card-body">
+<h4 class="mb-3">Connection Categories</h4>
+<div class="row g-3">
+<div class="col-md-6">
+<label class="form-label">Select Category</label>
+<select class="form-select" id="categorySelect"></select>
+</div>
+<div class="col-md-4">
+<label class="form-label">Number of Connections</label>
+<input class="form-control" id="existingConnections" min="0" placeholder="Enter number" type="number">
+</input></div>
+<div class="col-md-2 d-grid" style="align-self: end;">
+<button class="btn btn-primary" id="addCategoryBtn" type="button">
+<i class="fa-solid fa-plus me-1"></i> Add
+                </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Bulk-only extra fields (shown when selecting Bulk categories) -->
+<div id="bulk-extra-fields" class="row g-3 mt-3" style="display:none">
+  <div class="col-md-3">
+    <label class="form-label">Supplier Name</label>
+    <input id="bulk-supplier" class="form-control" type="text" />
+  </div>
+   <div class="col-md-3">
+    <label class="form-label">Location</label>
+    <input id="bulk-location" class="form-control" type="text" />
+  </div>
+  <div class="col-md-3">
+    <label class="form-label">Account Number</label>
+    <select class="form-select" id="bulk-account"></select>
+  </div>
+  <div class="col-md-2">
+    <label class="form-label">Quantity</label>
+    <input id="bulk-quantity" class="form-control" type="number" />
+  </div>
+  
+  <div class="col-md-2">
+    <label class="form-label">Billing Month</label>
+    <select id="bulk-month" class="form-select">
+      <option value="">Select month</option>
+      <option>January</option>
+      <option>February</option>
+      <option>March</option>
+      <option>April</option>
+      <option>May</option>
+      <option>June</option>
+      <option>July</option>
+      <option>August</option>
+      <option>September</option>
+      <option>October</option>
+      <option>November</option>
+      <option>December</option>
+    </select>
+  </div>
+<div class="col-md-2">
+    <label class="form-label">Monthly Bill</label>
+    <input id="bulk-monthly" class="form-control" type="number" step="any"/>
+  </div>
+  <div class="col-md-2">
+    <label class="form-label">Officer Tel</label>
+    <input id="bulk-officer" class="form-control" type="tel" />
+  </div>
+</div>
+<!-- Connections List -->
+<div class="card border-0 shadow-sm mb-4" id="connectionsCard" style="display: none;">
+<div class="card-body">
+<h4 class="mb-3">Current Connections</h4>
+<ul class="list-group list-group-flush" id="connectionsList"></ul>
+</div>
+</div>
+<!-- Extended sections injected by JS -->
+<div id="extended-sections"></div>
+</div>
+</div>
+<!-- Labs Data Entry -->
+<div id="labs-entry-page" style="display: none;">
+<div class="dashboard-header">
+<div class="container text-center">
+<h1 class="display-4 fw-bold">Submit Water Quality Information</h1>
+<p class="lead">Enter water quality details for the selected location</p>
+</div>
+</div>
+<div class="container my-4">
+<div class="card border-0 shadow-sm mb-4">
+<div class="card-body d-flex justify-content-between">
+<div>
+<div class="text-muted small">Selected Region</div>
+<div class="fw-semibold" id="labs-region">-</div>
+</div>
+<div>
+<div class="text-muted small">Selected Location</div>
+<div class="fw-semibold" id="labs-location">-</div>
+</div>
+<div>
+<button class="btn btn-outline-secondary" onclick="showHomePage()" type="button">
+<i class="fa-solid fa-arrow-left me-1"></i> Back
+              </button>
+</div>
+</div>
+</div>
+<form id="labsForm">
+<div class="card border-0 shadow-sm mb-4">
+<div class="card-body">
+<h4 class="mb-3">Water Quality Details</h4>
+<div class="row g-3">
+<div class="col-12">
+<label class="form-label" for="lab-raw">Raw water</label>
+<textarea class="form-control" id="lab-raw" placeholder="Enter raw water details..." rows="3"></textarea>
+</div>
+<div class="col-12">
+<label class="form-label" for="lab-treated-tp">Treated water - TP</label>
+<textarea class="form-control" id="lab-treated-tp" placeholder="Enter treated water (TP) details..." rows="3"></textarea>
+</div>
+<div class="col-12">
+<label class="form-label" for="lab-treated-dist">Treated water Distribution</label>
+<textarea class="form-control" id="lab-treated-dist" placeholder="Enter treated water distribution details..." rows="3"></textarea>
+</div>
+<div class="col-12">
+<label class="form-label" for="lab-issues">WQ issues</label>
+<textarea class="form-control" id="lab-issues" placeholder="Enter any water quality issues..." rows="4"></textarea>
+</div>
+</div>
+<div class="text-center mt-4">
+<button class="btn btn-success btn-lg" id="labsSubmitBtn" type="submit">
+<i class="fa-solid fa-floppy-disk me-1"></i> Submit
+                </button>
+</div>
+</div>
+</div>
+</form>
+</div>
+</div>
+<!-- Plant Data Entry -->
+<div id="plant-entry-page" style="display: none;">
+<div class="dashboard-header">
+<div class="container text-center">
+<h1 class="display-4 fw-bold">Submit Plant Information</h1>
+<p class="lead">Enter plant details for the selected location</p>
+</div>
+</div>
+<div class="container my-4">
+<div class="card border-0 shadow-sm mb-4">
+<div class="card-body d-flex justify-content-between">
+<div>
+<div class="text-muted small">Selected Region</div>
+<div class="fw-semibold" id="plant-region">-</div>
+</div>
+<div>
+<div class="text-muted small">Selected Location</div>
+<div class="fw-semibold" id="plant-location">-</div>
+</div>
+<div>
+<button class="btn btn-outline-secondary" onclick="showHomePage()" type="button">
+<i class="fa-solid fa-arrow-left me-1"></i> Back
+              </button>
+</div>
+</div>
+</div>
+<form id="plantForm">
+<div class="card border-0 shadow-sm mb-4">
+<div class="card-body">
+<h4 class="mb-3">Plant Details</h4>
+<div class="mb-3">
+<label class="form-label" for="plant-scheme-brief">Scheme brief and history (intake/TP)</label>
+<textarea class="form-control" id="plant-scheme-brief" placeholder="Enter scheme brief and history..." rows="4"></textarea>
+</div>
+<div class="mb-3">
+<label class="form-label" for="plant-photos-input">Photos</label>
+<input accept="image/*" class="form-control" id="plant-photos-input" multiple="" type="file"/>
+<div class="form-text">Choose one or more images from your device.</div>
+<div class="mt-3" id="plant-photos-preview"></div>
+</div>
+<div class="row g-3">
+<div class="col-md-6">
+<label class="form-label" for="plant-designed-capacity">Designed plant capacity (cum/day)</label>
+<input class="form-control" id="plant-designed-capacity" placeholder="e.g. 5000" step="any" type="number"/>
+</div>
+<div class="col-md-6">
+<label class="form-label" for="plant-operational-capacity">Operational capacity (cum/day)</label>
+<input class="form-control" id="plant-operational-capacity" placeholder="e.g. 4200" step="any" type="number"/>
+</div>
+</div>
+<div class="row g-3 mt-1">
+<div class="col-md-6">
+<label class="form-label" for="plant-water-source">Water source/ownership</label>
+<input class="form-control" id="plant-water-source" placeholder="e.g. Mahaweli River / NWSDB" type="text"/>
+</div>
+<div class="col-md-6">
+<label class="form-label" for="plant-approved-extraction">Approved extraction quantity (cum/day)</label>
+<input class="form-control" id="plant-approved-extraction" placeholder="e.g. 4800" step="any" type="number"/>
+</div>
+</div>
+<div class="row g-3 mt-1">
+<div class="col-md-6">
+<label class="form-label" for="plant-treatment-type">Treatment plant (full/partial/CI only/other)</label>
+<input class="form-control" id="plant-treatment-type" list="plant-treatment-type-list" placeholder="Select or type" type="text"/>
+<datalist id="plant-treatment-type-list">
+<option value="Full"></option>
+<option value="Partial"></option>
+<option value="CI only"></option>
+<option value="Other"></option>
+</datalist>
+</div>
+<div class="col-md-6">
+<label class="form-label" for="plant-coverage">Coverage (DS/GN areas)</label>
+<textarea class="form-control" id="plant-coverage" placeholder="List DS/GN areas covered..." rows="2"></textarea>
+</div>
+</div>
+<div class="row g-3 mt-1">
+
+
+</div>
+<div class="text-center mt-4">
+<button class="btn btn-success btn-lg" id="plantSubmitBtn" type="submit">
+<i class="fa-solid fa-floppy-disk me-1"></i> Submit
+                </button>
+</div>
+</div>
+</div>
+</form>
+</div>
+</div>
+<!-- Submissions & Analytics -->
+<div id="submissions-page" style="display: none;">
+<div class="dashboard-header">
+<div class="container text-center">
+<h1 class="display-5 fw-bold">
+<i aria-hidden="true" class="fa-solid fa-file-circle-check me-2"></i>
+<span>Submissions &amp; Analytics</span>
+</h1>
+<p class="lead">Filter, visualize, and export your data</p>
+</div>
+</div>
+<div class="container my-4">
+<div class="card border-0 shadow-sm mb-3">
+<div class="card-body" id="sub-filter-bar">
+<div class="row g-3 align-items-end">
+<div class="col-md-3">
+<label class="form-label">Dataset</label>
+<select class="form-select" id="sub-dataset">
+<option value="scheme">Scheme</option>
+<option value="plant">Plant</option>
+<option value="labs">Labs</option>
+</select>
+</div>
+<div class="col-md-3">
+<label class="form-label">Region</label>
+<select class="form-select" id="sub-region">
+<option value="">All Regions</option>
+</select>
+</div>
+<div class="col-md-3">
+<label class="form-label">Location</label>
+<select class="form-select" id="sub-location">
+<option value="">All Locations</option>
+</select>
+</div>
+<div class="col-md-3 d-grid d-md-block">
+<button class="btn btn-primary w-100" id="sub-apply" type="button">
+<i class="fa-solid fa-filter me-1"></i> Apply Filters
+                </button>
+</div>
+<div class="col-md-6">
+<label class="form-label">From</label>
+<input class="form-control" id="sub-from" type="date"/>
+</div>
+<div class="col-md-6">
+<label class="form-label">To</label>
+<input class="form-control" id="sub-to" type="date"/>
+</div>
+<div class="col-12">
+<div class="filter-chips">
+<button class="btn btn-light btn-sm sub-quick" data-range="7" type="button">Last 7 days</button>
+<button class="btn btn-light btn-sm sub-quick" data-range="30" type="button">Last 30 days</button>
+<button class="btn btn-light btn-sm sub-quick" data-range="365" type="button">Last 365 days</button>
+<button class="btn btn-outline-secondary btn-sm" id="sub-reset" type="button">Reset</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- KPIs -->
+<div class="row g-3 mb-3" id="sub-kpis">
+<div class="col-md-3">
+<div class="kpi-card">
+<div class="kpi-title">Total Submissions</div>
+<div aria-live="polite" class="kpi-value" id="kpi-total">0</div>
+</div>
+</div>
+<div class="col-md-3">
+<div class="kpi-card">
+<div class="kpi-title">Unique Locations</div>
+<div aria-live="polite" class="kpi-value" id="kpi-locations">0</div>
+</div>
+</div>
+<div class="col-md-3">
+<div class="kpi-card">
+<div class="kpi-title">Regions</div>
+<div aria-live="polite" class="kpi-value" id="kpi-regions">0</div>
+</div>
+</div>
+<div class="col-md-3">
+<div class="kpi-card">
+<div class="kpi-title">Latest Submit</div>
+<div aria-live="polite" class="kpi-value small" id="kpi-latest">-</div>
+</div>
+</div>
+</div>
+<!-- Charts -->
+<div class="card border-0 shadow-sm mb-3">
+<div class="card-body">
+<div class="alert alert-info d-none" id="charts-unavailable">
+<i class="fa-solid fa-circle-info me-1"></i>
+              Charts unavailable (Chart.js not loaded). Connect to internet to load charts.
+            </div>
+<div class="row g-4" id="sub-charts">
+  <div class="col-lg-6 scheme-chart">
+    <h6 class="text-muted">Supplier — Total Monthly Bill</h6>
+    <canvas id="chart-supplier-bill" height="220" aria-label="Supplier total monthly bill" role="img"></canvas>
+  </div>
+  <div class="col-lg-6 scheme-chart">
+    <h6 class="text-muted">Location — Quantity (Bulk)</h6>
+    <canvas id="chart-location-qty" height="220" aria-label="Quantity by location (bulk)" role="img"></canvas>
+  </div>
+
+<!-- Scheme charts -->
+<div aria-hidden="true" class="col-lg-6 scheme-chart chart-card">
+<h6 class="text-muted">Connections by Category</h6>
+<canvas id="chart-scheme-connections"></canvas>
+</div>
+<div aria-hidden="true" class="col-lg-6 scheme-chart chart-card">
+<h6 class="text-muted">Growth (<span id="scheme-growth-range">2015-2025</span>)</h6>
+<canvas id="chart-scheme-growth"></canvas>
+</div>
+<!-- Plant charts -->
+<div aria-hidden="true" class="col-lg-6 plant-chart chart-card">
+<h6 class="text-muted">Designed vs Operational Capacity</h6>
+<canvas id="chart-plant-capacity"></canvas>
+</div>
+<div aria-hidden="true" class="col-lg-6 plant-chart chart-card">
+<h6 class="text-muted">Treatment Type Distribution</h6>
+<canvas id="chart-plant-treatment"></canvas>
+</div>
+<!-- Labs charts -->
+<div aria-hidden="true" class="col-lg-6 labs-chart">
+<h6 class="text-muted">Submissions per Location</h6>
+<canvas id="chart-labs-submissions"></canvas>
+</div>
+</div>
+</div>
+
+
+</div>
+<!-- Table + Export -->
+<div class="card border-0 shadow-sm">
+<div class="card-body">
+<div class="d-flex justify-content-between align-items-center mb-2">
+<h5 class="mb-0">
+<i aria-hidden="true" class="fa-solid fa-file-circle-check me-1"></i>
+<span>Filtered Submissions</span>
+</h5>
+<button class="btn btn-outline-secondary btn-sm" id="sub-export" type="button">
+<i class="fa-solid fa-file-csv me-1"></i> Export CSV
+              </button>
+</div>
+<div class="table-responsive">
+<table class="table table-hover align-middle">
+<thead class="table-light">
+<tr id="sub-table-head"></tr>
+</thead>
+<tbody id="sub-table-body"></tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- ADMIN PAGE -->
+<div id="admin-page" style="display:none;">
+<div class="dashboard-header">
+<div class="container text-center">
+<h1 class="display-5 fw-bold">Developer Options</h1>
+<p class="lead">Manage regions and locations for Scheme, Plant, and Labs</p>
+</div>
+</div>
+<div class="container my-4">
+<div class="card border-0 shadow-sm mb-4">
+<div class="card-body">
+<div class="d-flex flex-wrap align-items-center justify-content-between">
+<div>
+<h4 class="mb-1">Manage Regions &amp; Locations</h4>
+</div>
+<div>
+<button class="btn btn-outline-secondary btn-sm" onclick="showHomePage()" type="button">
+<i class="fa-solid fa-arrow-left me-1"></i> Back
+                </button>
+</div>
+</div>
+<hr/>
+<div class="row g-3 align-items-end mb-3">
+  <div class="col-md-4">
+    <label class="form-label">Reporting Year (Scheme)</label>
+    <input class="form-control" id="adm-reporting-year" type="number" min="1900" max="2100"/>
+    <div class="form-text">Default is 2026. Changing this updates the Scheme Monthly Data year and Connection Target label.</div>
+  </div>
+  <div class="col-md-2 d-grid">
+    <button class="btn btn-outline-primary" id="adm-save-year" type="button">
+      <i class="fa-solid fa-calendar-days me-1"></i> Apply Year
+    </button>
+  </div>
+</div>
+<div class="mb-3">
+<label class="form-label me-2">Dataset</label>
+<div aria-label="Dataset" class="btn-group" role="group">
+<input checked="" class="btn-check" id="adm-ds-scheme" name="adm-dataset" type="radio" value="scheme"/>
+<label class="btn btn-outline-primary" for="adm-ds-scheme"><i class="fa-solid fa-sitemap me-1"></i> Scheme</label>
+<input class="btn-check" id="adm-ds-plant" name="adm-dataset" type="radio" value="plant"/>
+<label class="btn btn-outline-primary" for="adm-ds-plant"><i class="fa-solid fa-industry me-1"></i> Plant</label>
+<input class="btn-check" id="adm-ds-labs" name="adm-dataset" type="radio" value="labs"/>
+<label class="btn btn-outline-primary" for="adm-ds-labs"><i class="fa-solid fa-flask me-1"></i> Labs</label>
+</div>
+<div class="form-text">Step 1. Choose what you're managing.</div>
+</div>
+<div class="row g-3 align-items-end">
+<div class="col-md-5">
+<label class="form-label">Region</label>
+<select class="form-select" id="adm-region"></select>
+<div class="form-text">Step 2. Pick a region or add a new one.</div>
+</div>
+<div class="col-md-7">
+<div class="row g-2 align-items-end">
+<div class="col-md-8">
+<label class="form-label">Region Label</label>
+<input class="form-control" id="adm-region-label" placeholder="e.g. Central West" type="text"/>
+</div>
+<div class="col-md-4 d-flex gap-2">
+<button class="btn btn-primary flex-grow-1" id="adm-add-region" type="button">
+<i class="fa-solid fa-plus me-1"></i> Add
+                    </button>
+<button class="btn btn-outline-secondary" data-bs-target="#adm-advanced" data-bs-toggle="collapse" type="button">
+                      Advanced
+                    </button>
+</div>
+<div class="col-12 collapse mt-2" id="adm-advanced">
+<label class="form-label">New Region Key (optional)</label>
+<input class="form-control" id="adm-region-key" placeholder="e.g. CENTRALWEST" type="text"/>
+<div class="form-text">Key must be unique. If left empty, it will be auto-generated from the label.</div>
+</div>
+</div>
+<div class="form-text">Add a new region (defaults are not removed).</div>
+</div>
+</div>
+<hr/>
+<div class="row g-3 align-items-end">
+<div class="col-md-8">
+<label class="form-label">Add Location(s) to Selected Region</label>
+<input class="form-control" id="adm-location-name" placeholder="Enter location name(s)" type="text"/>
+</div>
+<div class="col-md-2 d-grid">
+<button class="btn btn-success" id="adm-add-location" type="button">
+<i class="fa-solid fa-plus me-1"></i> Add Location
+                </button>
+</div>
+</div>
+<div class="mt-3">
+<h6 class="text-muted mb-2">Locations in Region</h6>
+<ul class="list-group list-group-flush" id="adm-location-list"></ul>
+</div>
+</div>
+</div>
+<div class="card border-0 shadow-sm">
+<div class="card-body">
+<h5 class="mb-3">Admin-added Items</h5>
+<div class="table-responsive">
+<table class="table table-hover align-middle">
+<thead class="table-light">
+<tr>
+<th style="width: 110px;">Dataset</th>
+<th style="width: 160px;">Region Key</th>
+<th>Region Label</th>
+<th>Location</th>
+<th style="width: 80px;">Action</th>
+</tr>
+</thead>
+<tbody id="adm-added-table"></tbody>
+</table>
+</div>
+<div class="text-muted small">Note: Removing a region removes all admin-added locations under it.</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer (always visible) -->
+<footer class="mt-5">
+<div class="container">
+<hr class="mt-4 bg-light">
+<div class="text-center">
+<p>© 2025 NWSDB WEB PORTAL SYSTEM Developed by RSC IT. All Rights Reserved.</p>
+</div>
+</hr></div>
+</footer>
+<!-- About Modal -->
+<div aria-hidden="true" aria-labelledby="aboutModalLabel" class="modal fade" id="aboutModal" tabindex="-1">
+<div class="modal-dialog modal-dialog-centered modal-lg">
+<div class="modal-content border-0 shadow-lg">
+<div class="modal-header">
+<h5 class="modal-title" id="aboutModalLabel">
+<i class="fa-solid fa-circle-info me-2"></i> About this Web Portal
+          </h5>
+<button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+</div>
+<div class="modal-body">
+<div class="row g-4">
+<div class="col-md-7">
+<p class="mb-2">The NWSDB Web Portal streamlines data collection, analytics, and reporting across the Central Regional Support Center.</p>
+<ul class="mb-0">
+<li>Secure login with session persistence</li>
+<li>Scheme growth, monthly KPIs, and expenditures</li>
+<li>Plant capacity, photos, and coverage info</li>
+<li>Labs water quality notes and issue tracking</li>
+<li>Filters, charts, and CSV exports for analytics</li>
+</ul>
+</div>
+<div class="col-md-5">
+<div class="card bg-light-subtle">
+<div class="card-body">
+<h6 class="mb-3"><i class="fa-solid fa-headset me-2"></i>Contact Us</h6>
+<ul class="list-unstyled small mb-0">
+<li class="mb-1"><i class="fa-solid fa-envelope me-2"></i> nwsdbrsccit@gmail.com</li>
+<li class="mb-1"><i class="fa-solid fa-envelope me-2"></i> nwsdbceit@gmail.com</li>
+<li class="mb-1"><i class="fa-solid fa-phone me-2"></i> 081 238 4473</li>
+<li class="mb-0"><i class="fa-solid fa-location-dot me-2"></i> NWSDB Regional Support Center - Central, Dangolla Road, Gatambe, Peradeniya</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="modal-footer">
+<button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Close</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Login Modal (User + Admin tabs) -->
+<div aria-hidden="true" class="modal fade" id="loginModal" tabindex="-1">
+<div class="modal-dialog modal-dialog-centered">
+<div class="modal-content border-0 shadow-lg">
+<div class="modal-header">
+<h5 class="modal-title"><i class="fa-solid fa-user-shield me-2"></i>Login</h5>
+<button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+</div>
+<div class="modal-body">
+<ul class="nav nav-pills justify-content-center mb-3" id="loginTabs" role="tablist">
+<li class="nav-item" role="presentation">
+<button aria-controls="user-login" aria-selected="true" class="nav-link active" data-bs-target="#user-login" data-bs-toggle="pill" id="user-tab" role="tab" type="button">
+<i class="fa-solid fa-user me-1"></i> User
+              </button>
+</li>
+<li class="nav-item" role="presentation">
+<button aria-controls="admin-login" aria-selected="false" class="nav-link" data-bs-target="#admin-login" data-bs-toggle="pill" id="admin-tab" role="tab" type="button">
+<i class="fa-solid fa-user-lock me-1"></i> Admin
+              </button>
+</li>
+</ul>
+<div class="tab-content" id="loginTabsContent">
+<div aria-labelledby="user-tab" class="tab-pane fade show active" id="user-login" role="tabpanel">
+<form class="needs-validation" id="loginForm" novalidate="">
+<div class="mb-3">
+  <label class="form-label" for="loginScope">Select Office</label>
+  <div class="input-group">
+    <span class="input-group-text"><i class="fa-solid fa-map-location-dot"></i></span>
+    <select class="form-select" id="loginScope" name="loginScope" required>
+      <option value="RSC" selected>RSC</option>
+      <option value="CENTRALNORTH">CENTRAL NORTH</option>
+      <option value="CENTRALSOUTH">CENTRAL SOUTH</option>
+      <option value="CENTRALEAST">CENTRAL EAST</option>
+      <option value="MATALE">MATALE</option>
+    </select>
+    <div class="invalid-feedback">Please select an office.</div>
+  </div>
+</div>
+
+<div class="mb-3 d-none" id="loginUsernameWrap">
+  <label class="form-label" for="loginUsername">Username</label>
+  <div class="input-group">
+    <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
+    <input autocomplete="username" class="form-control" id="loginUsername" name="loginUsername" placeholder="Enter your username" type="text" />
+  </div>
+</div>
+
+<div class="mb-3" id="loginEmailWrap">
+<label class="form-label" for="email">Email Address</label>
+<div class="input-group">
+<span class="input-group-text"><i class="fa-solid fa-envelope"></i></span>
+<input autocomplete="username" class="form-control" id="email" name="email" placeholder="Enter your email" required="" type="email">
+<div class="invalid-feedback">Please enter a valid email address.</div>
+</input></div>
+</div>
+<div class="mb-3">
+<label class="form-label" for="password">Password</label>
+<div class="input-group">
+<span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
+<input autocomplete="current-password" class="form-control" id="password" name="password" placeholder="Enter your password" required="" type="password">
+<button aria-label="Show password" aria-pressed="false" class="input-group-text password-toggle" id="passwordToggle" type="button">
+<i class="fa-solid fa-eye"></i>
+</button>
+<div class="invalid-feedback">Please enter your password.</div>
+</input></div>
+</div>
+<div class="mb-3 d-flex justify-content-between align-items-center">
+<div class="form-check">
+<input class="form-check-input" id="rememberMe" type="checkbox"/>
+<label class="form-check-label" for="rememberMe">Remember me</label>
+</div>
+<a class="text-decoration-none small text-primary-emphasis" href="#">Forgot Password?</a>
+</div>
+<div class="d-grid">
+<button class="btn btn-primary btn-lg login-submit-btn" id="loginSubmitBtn" type="submit">
+<span class="btn-label"><i class="fa-solid fa-right-to-bracket me-2"></i>Login</span>
+<span class="btn-spinner d-none">
+<span aria-hidden="true" class="spinner-border spinner-border-sm me-2" role="status"></span>
+                      Signing in...
+                    </span>
+</button>
+</div>
+</form>
+
+</div>
+<div aria-labelledby="admin-tab" class="tab-pane fade" id="admin-login" role="tabpanel">
+<form id="adminLoginForm" novalidate="">
+<div class="mb-3">
+<label class="form-label" for="adminUsername">Username</label>
+<div class="input-group">
+<span class="input-group-text"><i class="fa-solid fa-user"></i></span>
+<input class="form-control" id="adminUsername" placeholder="admin" required="" type="text"/>
+<div class="invalid-feedback">Enter username.</div>
+</div>
+</div>
+<div class="mb-3">
+<label class="form-label" for="adminPassword">Password</label>
+<div class="input-group">
+<span class="input-group-text"><i class="fa-solid fa-key"></i></span>
+<input class="form-control" id="adminPassword" placeholder="••••••" required="" type="password"/>
+<div class="invalid-feedback">Enter password.</div>
+</div>
+</div>
+<div class="d-grid">
+<button class="btn btn-warning btn-lg" id="adminLoginSubmitBtn" type="submit">
+<i class="fa-solid fa-unlock-keyhole me-2"></i> Login as Admin
+                  </button>
+</div>
+</form>
+<p class="text-center text-muted small mt-3 mb-0">
+                Admin:....
+              </p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Map Picker Modal -->
+
+<!-- Photo Gallery Modal -->
+<div aria-hidden="true" class="modal fade" id="photoGalleryModal" tabindex="-1">
+<div class="modal-dialog modal-dialog-centered modal-lg">
+<div class="modal-content border-0 shadow-lg">
+<div class="modal-header">
+<h5 class="modal-title" id="photoGalleryTitle">
+<i class="fa-solid fa-images me-2"></i>Plant Photos
+          </h5>
+<button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+</div>
+<div class="modal-body">
+<div class="text-center mb-3">
+<div class="small text-muted" id="currentPhotoInfo"></div>
+</div>
+<div class="text-center mb-3">
+<img alt="Plant photo" class="img-fluid rounded" id="galleryMainPhoto" src="" style="max-height: 400px; object-fit: contain;"/>
+</div>
+<div class="d-flex justify-content-between align-items-center mb-3">
+<button class="btn btn-outline-primary" id="prevPhotoBtn">
+<i class="fa-solid fa-chevron-left me-1"></i> Previous
+            </button>
+<div class="text-center">
+<span class="fw-semibold" id="photoCounter">1 / 1</span>
+</div>
+<button class="btn btn-outline-primary" id="nextPhotoBtn">
+              Next <i class="fa-solid fa-chevron-right ms-1"></i>
+</button>
+</div>
+<div class="photo-thumbnails" id="photoThumbnails"></div>
+</div>
+<div class="modal-footer">
+<button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Close</button>
+<a class="btn btn-primary" download="" id="downloadPhotoBtn">
+<i class="fa-solid fa-download me-1"></i> Download
+          </a>
+</div>
+</div>
+</div>
+</div>
+<!-- Bootstrap + Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" onerror="console.warn('CDN failed: script')"></script>
+<script onerror="console.warn('Chart.js failed to load')" src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<!-- App scripts -->
+<script src="script.js?v=23"></script>
+<script src="core.js?v=23"></script>
+<script src="modal.js?v=23"></script>
+<script src="app.js"></script>
+<script src="app2.js"></script>
+<script src="system.js"></script>
+<script src="enhance-bulk.js"></script>
+<script src="fix-month.js"></script>
+
+<!-- Theme toggle and Chart.js theme integration -->
+<script>
+    (function(){
+      const THEME_KEY = 'nwsdb_theme';
+
+      function getTheme() {
+        return localStorage.getItem(THEME_KEY) || document.documentElement.getAttribute('data-bs-theme') || 'light';
+      }
+
+      function setTheme(theme) {
+        document.documentElement.setAttribute('data-bs-theme', theme);
+        localStorage.setItem(THEME_KEY, theme);
+        updateThemeToggleUI(theme);
+        applyChartTheme(theme);
+        try { if (typeof initLandingCharts === 'function') initLandingCharts(); } catch(_){}
+        try { if (typeof renderSubmissions === 'function' && typeof subPageInited !== 'undefined' && subPageInited) renderSubmissions(); } catch(_){}
+      }
+
+      function toggleTheme() {
+        setTheme(getTheme() === 'dark' ? 'light' : 'dark');
+      }
+
+      function updateThemeToggleUI(theme) {
+        const setIcon = (btn) => {
+          if (!btn) return;
+          const i = btn.querySelector('i');
+          if (!i) return;
+          const isDark = theme === 'dark';
+          i.classList.toggle('fa-moon', !isDark);
+          i.classList.toggle('fa-sun', isDark);
+          btn.setAttribute('aria-pressed', String(isDark));
+          btn.setAttribute('title', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+        };
+        setIcon(document.getElementById('themeTogglePublic'));
+        setIcon(document.getElementById('themeToggleApp'));
+      }
+
+      function applyChartTheme(theme) {
+        if (typeof Chart === 'undefined') return;
+        const cs = getComputedStyle(document.documentElement);
+        const text = (cs.getPropertyValue('--bs-body-color') || '#212529').trim();
+        const grid = (cs.getPropertyValue('--bs-border-color') || 'rgba(0,0,0,.1)').trim();
+        const legend = text;
+
+        Chart.defaults.color = text;
+        Chart.defaults.borderColor = grid;
+
+        if (typeof CHARTS !== 'undefined' && CHARTS) {
+          Object.values(CHARTS).forEach(ch => {
+            if (!ch) return;
+            if (ch.options?.plugins?.legend?.labels) ch.options.plugins.legend.labels.color = legend;
+            if (ch.options?.scales) {
+              Object.values(ch.options.scales).forEach(axis => {
+                if (axis.ticks) axis.ticks.color = text;
+                if (axis.grid) axis.grid.color = grid;
+              });
+            }
+            ch.update('none');
+          });
+        }
+      }
+
+      function wireThemeToggles() {
+        document.getElementById('themeTogglePublic')?.addEventListener('click', toggleTheme);
+        document.getElementById('themeToggleApp')?.addEventListener('click', toggleTheme);
+        updateThemeToggleUI(getTheme());
+        applyChartTheme(getTheme());
+      }
+
+      window.addEventListener('DOMContentLoaded', wireThemeToggles);
+      window.nwsdbToggleTheme = toggleTheme;
+      window.nwsdbSetTheme = setTheme;
+    })();
+  </script>
+
+<!-- removed duplicate Chart.js include -->
+  <script src="hrm.js"></script>
+
+<!-- Firebase Firestore + Anonymous Auth Integration (v3) -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-analytics.js";
+  import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
+  import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDONOM5vrhAJsaerwJSUW71WAbdyi3wGqM",
+    authDomain: "web-portal-ac49e.firebaseapp.com",
+    databaseURL: "https://web-portal-ac49e-default-rtdb.firebaseio.com",
+    projectId: "web-portal-ac49e",
+    storageBucket: "web-portal-ac49e.firebasestorage.app",
+    messagingSenderId: "613964862307",
+    appId: "1:613964862307:web:a6e83dc5550d90b3ddb956",
+    measurementId: "G-C2CREDS85T"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  try { getAnalytics(app); } catch (e) {}
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+  const $id = (id) => document.getElementById(id);
+
+  function findFieldByLabel(labelText) {
+    const labels = $$('label');
+    const target = labels.find(l => l.textContent.trim().toLowerCase().includes(labelText.toLowerCase()));
+    if (!target) return null;
+    const forId = target.getAttribute('for');
+    if (forId && $id(forId)) return $id(forId);
+    const container = target.parentElement;
+    if (!container) return null;
+    return container.querySelector('input,select,textarea');
+  }
+
+  function getValues() {
+    const accountEl   = $id('accountNumber') || findFieldByLabel('Account Number');
+    const qtyEl       = $id('quantity')      || findFieldByLabel('Quantity');
+    const billEl      = $id('monthlyBill')   || findFieldByLabel('Monthly Bill');
+    const telEl       = $id('officerTel')    || findFieldByLabel('Officer Tel');
+    const supplierEl  = $id('supplierName')  || findFieldByLabel('Supplier Name');
+    const locEl       = $id('location')      || findFieldByLabel('Location');
+    return {
+      accountNumber: accountEl ? accountEl.value : '',
+      quantityStr:   qtyEl ? qtyEl.value : '',
+      monthlyStr:    billEl ? billEl.value : '',
+      officerTel:    telEl ? (telEl.value || '').trim() : '',
+      supplierName:  supplierEl ? (supplierEl.value || '').trim() : '',
+      location:      locEl ? (locEl.value || '').trim() : '',
+      found: {accountEl, qtyEl, billEl, telEl, supplierEl, locEl}
+    };
+  }
+
+  function ensureMessageArea(btn){
+    let msg = document.getElementById('firestoreMsg');
+    if (!msg) {
+      msg = document.createElement('div');
+      msg.id = 'firestoreMsg';
+      msg.style.marginTop = '10px';
+      msg.style.fontSize = '14px';
+      msg.style.minHeight = '18px';
+      btn.after(msg);
+    }
+    return msg;
+  }
+
+  async function handleAdd(e) {
+    e.preventDefault();
+    const vals = getValues();
+    const quantity = Number(vals.quantityStr);
+    const monthlyBill = Number(vals.monthlyStr);
+
+    const btn = e.currentTarget;
+    const msg = ensureMessageArea(btn);
+    msg.textContent = '';
+
+    if (!vals.supplierName){ msg.textContent='Supplier Name is required.'; msg.style.color='red'; return; }
+    if (!vals.officerTel){ msg.textContent='Officer Tel is required.'; msg.style.color='red'; return; }
+    if (Number.isNaN(quantity) || quantity < 0){ msg.textContent='Quantity must be a non-negative number.'; msg.style.color='red'; return; }
+    if (Number.isNaN(monthlyBill) || monthlyBill < 0){ msg.textContent='Monthly Bill must be a non-negative number.'; msg.style.color='red'; return; }
+
+    const payload = {
+      accountNumber: vals.accountNumber || null,
+      quantity,
+      monthlyBill,
+      officerTel: vals.officerTel,
+      supplierName: vals.supplierName,
+      location: vals.location || null,
+      createdAt: serverTimestamp(),
+    };
+
+    btn.disabled = true; const old = btn.textContent; btn.textContent = 'Saving…';
+    try {
+      await addDoc(collection(db, 'utilities'), payload);
+      msg.textContent = 'Saved successfully ✅'; msg.style.color = 'limegreen';
+      Object.values(vals.found).forEach(el => { if (el) el.value = ''; });
+    } catch (err) {
+      console.error('Firestore save error:', err.code, err.message);
+      msg.textContent = `Failed to save: ${err.code || err.message}`; msg.style.color='red';
+      if (location.protocol === 'file:') {
+        console.warn('You are running from file://. Use a local server like http://localhost:8080/');
+      }
+    } finally {
+      btn.disabled = false; btn.textContent = old;
+    }
+  }
+
+  function pickAddButton(){
+    let btn = $id('addBtn');
+    if (btn) return btn;
+    btn = document.querySelector('[data-role="utilities-add"]');
+    if (btn) return btn;
+    const candidates = $$('button');
+    const plusAdd = candidates.filter(b => b.textContent.trim() === '+ Add' || b.textContent.trim().toLowerCase() === 'add');
+    if (plusAdd.length === 1) return plusAdd[0];
+    for (const b of plusAdd) {
+      const bg = getComputedStyle(b).backgroundColor;
+      if (bg.includes('22, 163, 74') || bg.includes('16, 163, 74') || /green/i.test(bg) || (b.className||'').match(/(btn-success|bg-green)/i)) {
+        return b;
+      }
+    }
+    return plusAdd[0] || null;
+  }
+
+  function initAfterAuth() {
+    const btn = pickAddButton();
+    if (!btn) {
+      console.warn('Add button not found (auth v3). Ensure the button text is "+ Add" or id="addBtn".');
+      return;
+    }
+    if (!btn.id) btn.id = 'addBtn';
+    btn.addEventListener('click', handleAdd, { once: false });
+    console.info('Firestore: wired + Add button');
+  }
+
+  // Sign in anonymously so rules with request.auth != null pass
+  signInAnonymously(auth)
+    .then(() => {
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          console.info('Signed in anonymously:', user.uid);
+          initAfterAuth();
+        }
+      });
+    })
+    .catch((err) => {
+      console.error('Anonymous sign-in failed:', err.code, err.message);
+      initAfterAuth();
+    });
+</script>
+
+
+<!-- Plant Overlay (Replaces old modal) -->
+<div id="plantOverlay" class="plant-overlay" style="display:none;">
+  <div class="plant-overlay-header">
+    <div class="plant-overlay-title">Plant System</div>
+    <button type="button" class="btn btn-sm btn-light" id="closePlantOverlay">Close</button>
+  </div>
+  <div class="plant-overlay-body">
+    <iframe id="plantOverlayFrame" src="about:blank" style="width:100%;height:100%;border:0;"></iframe>
+  </div>
+</div>
+
+
+<!-- Plant Choice Modal -->
+<div class="modal fade" id="plantChoiceModal" tabindex="-1" aria-labelledby="plantChoiceModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="plantChoiceModalLabel">Plant</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Please select what you want to open.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="btnPlantWaterQuality">WATER QUALITY</button>
+        <button type="button" class="btn btn-success" id="btnPlantPlaceholder" title="Open plant system">PLANT</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- HRM Fullscreen Overlay (hidden by default) -->
+<div id="hrmOverlay" class="hrm-overlay" style="display:none;">
+  <div class="hrm-overlay-container">
+    <div class="hrm-overlay-header">
+      <div class="hrm-overlay-title">HRM</div>
+      <div class="hrm-overlay-actions">
+        <button type="button" class="btn btn-sm btn-outline-light" id="hrmOverlayOpenNewTab">Open in new tab</button>
+        <button type="button" class="btn btn-sm btn-light" id="hrmOverlayClose">Close</button>
+      </div>
+    </div>
+    <div class="hrm-overlay-body">
+      <iframe id="hrmOverlayFrame" class="hrm-overlay-frame" src="" frameborder="0" allowfullscreen></iframe>
+    </div>
+  </div>
+</div>
+
+<!-- HRM Choice Modal -->
+<div class="modal fade" id="hrmChoiceModal" tabindex="-1" aria-labelledby="hrmChoiceModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="hrmChoiceModalLabel">HRM</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Please select what you want to open.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-primary" id="btnHrmCardar">CARDAR</button>
+        <button type="button" class="btn btn-primary" id="btnHrmPersonal">PERSONAL DETAILS</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- NRW Choice Modal -->
+<div class="modal fade" id="nrwChoiceModal" tabindex="-1" aria-labelledby="nrwChoiceModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="nrwChoiceModalLabel">NRW</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Please select what you want to open.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="btnNrwProduction">PRODUCTION</button>
+        <button type="button" class="btn btn-outline-primary" id="btnNrwLeak" title="Open Leak Repair Status System">LEAK</button>
+        <button type="button" class="btn btn-outline-primary" id="btnNrwMis" title="Open MIS 11 Tabs System">MIS</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+
+/* ===== HRM Fullscreen Overlay Logic ===== */
+let _hrmOverlayInitialized = false;
+
+function initHRMOverlay(){
+  if(_hrmOverlayInitialized) return;
+  _hrmOverlayInitialized = true;
+
+  const overlay = document.getElementById('hrmOverlay');
+  const frame = document.getElementById('hrmOverlayFrame');
+  const closeBtn = document.getElementById('hrmOverlayClose');
+  const openNewTabBtn = document.getElementById('hrmOverlayOpenNewTab');
+
+  if(!overlay || !frame || !closeBtn) return;
+
+  // Close actions
+  closeBtn.addEventListener('click', closeHRMOverlay);
+  overlay.addEventListener('click', (e)=>{
+    // click outside iframe container closes
+    if(e.target === overlay) closeHRMOverlay();
+  });
+
+  // ESC key closes
+  document.addEventListener('keydown', (e)=>{
+    if(e.key === 'Escape' && overlay.style.display !== 'none'){
+      closeHRMOverlay();
+    }
+  });
+
+  // open in new tab
+  if(openNewTabBtn){
+    openNewTabBtn.addEventListener('click', ()=>{
+      const url = frame.getAttribute('src') || 'hrmforms/HRM%20forms/index.html';
+      window.open(url, '_blank');
+    });
+  }
+
+  // No separate loader: iframe just loads in-place.
+}
+
+
+
+
+
+/* ===== Development Works: Open Internal Project Data Entry System ===== */
+(function initDevelopmentWorksLink(){
+  const btn = document.getElementById("btnViewProjects");
+  if(!btn) return;
+
+  const url = "development-works-system/index.html";
+
+  btn.addEventListener("click", ()=>{
+    window.location.href = url;
+  });
+})();
+
+
+/* ===== NRW Choice Modal ===== */
+(function initNRWChoice(){
+  const btn = document.getElementById("btnOpenNRW");
+  const modalEl = document.getElementById("nrwChoiceModal");
+  const productionBtn = document.getElementById("btnNrwProduction");
+  const leakBtn = document.getElementById("btnNrwLeak");
+  const misBtn = document.getElementById("btnNrwMis");
+
+  if(!btn || !modalEl) return;
+
+  const modal = new bootstrap.Modal(modalEl, { backdrop: true, keyboard: true });
+  const productionUrl = "https://it-nwsdb.github.io/NWSDB-NRW/";
+  const leakUrl = "leak-repair-status-system/index.html";
+  const misUrl = "mis_11_tabs_system/index.html";
+
+  btn.addEventListener("click", ()=> modal.show());
+
+  if(productionBtn){
+    productionBtn.addEventListener("click", ()=>{
+      window.open(productionUrl, "_blank", "noopener");
+      modal.hide();
+    });
+  }
+
+  if(leakBtn){
+    leakBtn.disabled = false;
+    leakBtn.addEventListener("click", ()=>{
+      modal.hide();
+      window.location.href = leakUrl;
+    });
+  }
+
+  if(misBtn){
+    misBtn.disabled = false;
+    misBtn.addEventListener("click", ()=>{
+      modal.hide();
+      window.location.href = misUrl;
+    });
+  }
+})();
+
+
+/* ===== Overall Commercial Performance ===== */
+(function initOverallCommercialPerformanceLink(){
+  const btn = document.getElementById("btnOpenCommercial");
+  if(!btn) return;
+
+  const url = "overall-commercial-performance-system/index.html";
+
+  btn.addEventListener("click", ()=>{
+    window.location.href = url;
+  });
+})();
+
+
+/* ===== Project Progress Monitoring ===== */
+(function initProjectProgressMonitoringLink(){
+  const btn = document.getElementById("btnViewProgressProjects");
+  if(!btn) return;
+
+  const url = "project-progress-monitoring-system/index.html";
+
+  btn.addEventListener("click", ()=>{
+    window.location.href = url;
+  });
+})();
+/* ===== HRM Card Choice Modal ===== */
+(function initHRMChoice(){
+  const btn = document.getElementById("btnGoHRM");
+  const modalEl = document.getElementById("hrmChoiceModal");
+  const cardarBtn = document.getElementById("btnHrmCardar");
+  const personalBtn = document.getElementById("btnHrmPersonal");
+
+  if(!btn || !modalEl) return;
+
+  const modal = new bootstrap.Modal(modalEl, { backdrop: true, keyboard: true });
+
+  btn.addEventListener("click", ()=> modal.show());
+
+  if(cardarBtn){
+    cardarBtn.addEventListener("click", ()=>{
+      window.open("https://it-nwsdb.github.io/HRM/", "_blank", "noopener");
+      modal.hide();
+    });
+  }
+
+  if(personalBtn){
+    personalBtn.addEventListener("click", ()=>{
+      window.open("https://it-nwsdb.github.io/NWSDB-Persona-lData/", "_blank", "noopener");
+      modal.hide();
+    });
+  }
+})();
+</script>
+</body>
+</html>
+
+<!-- This is a single-line comment -->

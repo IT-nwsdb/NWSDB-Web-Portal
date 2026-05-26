@@ -1,0 +1,14 @@
+// Firestore Rules snippet for Utilities Billing Months
+match /databases/{db}/documents {
+  match /utilities/billingMonths/{monthId} {
+    allow read: if request.auth != null;
+    // Restrict writes to admins or service accounts
+    allow write: if request.auth != null && request.auth.token.admin == true;
+  }
+  match /schemeExtended/{docId} {
+    allow read: if request.auth != null;
+    allow write: if request.auth != null
+      && request.resource.data.billingMonthRef is path
+      && request.resource.data.billingMonthRef.path.matches("^utilities/billingMonths/[^/]+$");
+  }
+}

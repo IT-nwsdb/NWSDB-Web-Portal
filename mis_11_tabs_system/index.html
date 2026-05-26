@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Monthly MIS Data Entry System</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css"></head>
+<body>
+  <div id="loadingScreen" class="loading-screen" role="status" aria-live="polite">
+    <div class="loading-card">
+      <div class="loading-drop">💧</div>
+      <h1>Water Supply Management Information System</h1>
+      <p>Please wait, opening your data entry system...</p>
+      <div class="loading-bar"><span></span></div>
+    </div>
+  </div>
+
+  <div class="app-wrapper">
+    <div class="top-action-bar" aria-label="Main actions">
+      <a class="btn btn-outline-secondary portal-back-btn" href="../webindex.html" title="Return to main web portal">← Back to Main Portal</a>
+      <div class="status-cluster" aria-live="polite">
+        <span class="save-status" id="autoSaveStatus">Local ready</span>
+        <span class="db-status" id="dbStatus">Database connecting...</span>
+      </div>
+      <button class="btn btn-outline-danger" id="clearAllTabsBtn" type="button">CLEAR ALL 11 TABS</button>
+      <button class="btn btn-primary" id="saveNowBtn" type="button">SAVE ALL</button>
+      <button class="btn btn-outline-primary" id="printBtn" type="button">PRINT REPORT</button>
+    </div>
+    <section class="info-card">
+      <div class="row g-3">
+        <div class="col-lg-3 col-md-6">
+          <label class="form-label">Scheme</label>
+          <input class="form-control form-control-lg" data-store="meta.scheme" value="Water Supply Scheme Matale" placeholder="Scheme name">
+        </div>
+        <div class="col-lg-3 col-md-6">
+          <label class="form-label">Name of the OIC</label>
+          <input class="form-control form-control-lg" data-store="meta.oic" value="K.M.T Tharangani" placeholder="OIC name">
+        </div>
+        <div class="col-lg-3 col-md-6">
+          <label class="form-label">Month & Year</label>
+          <input class="form-control form-control-lg" data-store="meta.month" value="2026 - February" placeholder="Example: 2026 - February">
+        </div>
+        <div class="col-lg-3 col-md-6">
+          <label class="form-label">Report ID</label>
+          <input class="form-control form-control-lg" data-store="meta.reportId" placeholder="Auto generated database ID">
+        </div>
+      </div>
+    </section>
+
+    <div class="main-layout">
+      <aside class="side-nav" aria-label="MIS sections">
+        <div class="side-title">Sections</div>
+        <div class="nav nav-pills" id="mainTabs" role="tablist">
+          <button class="nav-link active" type="button" data-tab-target="#tab-production">1. Production</button>
+          <button class="nav-link" type="button" data-tab-target="#tab-service">2. Service Connection</button>
+          <button class="nav-link" type="button" data-tab-target="#tab-complaints">3. Complaints</button>
+          <button class="nav-link" type="button" data-tab-target="#tab-leaks">4. Water Leaks</button>
+          <button class="nav-link" type="button" data-tab-target="#tab-pipeline">5. Pipe Line</button>
+          <button class="nav-link" type="button" data-tab-target="#tab-meters">6. Defective Meters</button>
+          <button class="nav-link" type="button" data-tab-target="#tab-valves">7. Valves</button>
+          <button class="nav-link" type="button" data-tab-target="#tab-illegal">8. Illegal Connections</button>
+          <button class="nav-link" type="button" data-tab-target="#tab-bulk">9. Bulk</button>
+          <button class="nav-link" type="button" data-tab-target="#tab-arrears">10. Billing Arrears</button>
+          <button class="nav-link" type="button" data-tab-target="#tab-expenditure">11. Expenditure</button>
+        </div>
+      </aside>
+
+      <main class="work-area">
+        <div class="step-line">
+          <span id="stepText">Step 1 of 11</span>
+          <div class="progress"><div class="progress-bar" id="stepProgress" style="width: 9%"></div></div>
+        </div>
+
+        <div class="tab-content" id="mainTabContent">
+          <section class="tab-pane active show" id="tab-production">
+            <div class="section-card">
+              <div class="section-head">
+                <div>
+                  <h2>1.0 Production</h2>
+                  <p>Enter beginning and ending bulk meter readings. Production is calculated as B - A.</p>
+                </div>
+                <span class="unit-pill">m³</span>
+              </div>
+
+              <div class="table-responsive simple-table-wrap">
+                <table class="table table-bordered align-middle simple-table" id="productionTable">
+                  <thead>
+                    <tr>
+                      <th rowspan="2" class="name-col">Name of the reservoir</th>
+                      <th colspan="4">Bulk meter reading</th>
+                      <th rowspan="2">Correction Factor</th>
+                      <th rowspan="2">Production (m³)<br><small>(B - A)</small></th>
+                    </tr>
+                    <tr>
+                      <th>Beginning of the month (A)</th>
+                      <th>Reading Date</th>
+                      <th>End of the month (B)</th>
+                      <th>Reading Date</th>
+                    </tr>
+                  </thead>
+                  <tbody id="productionRows"></tbody>
+                  <tfoot>
+                    <tr>
+                      <th colspan="6" class="text-end">Total Production</th>
+                      <th><input class="form-control form-control-sm calc-box" id="productionTotal" readonly></th>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+
+              <div class="row g-3 mt-2">
+                <div class="col-md-5">
+                  <label class="form-label">Bowser Supply (m³)</label>
+                  <input class="form-control" type="number" step="any" data-store="production.bowserSupply" placeholder="Enter bowser supply">
+                </div>
+                <div class="col-md-7">
+                  <label class="form-label">Bulk supply to other regions (m³)</label>
+                  <div class="table-responsive">
+                    <table class="table table-bordered simple-table mini-table mb-0">
+                      <thead><tr><th>Region</th><th>Quantity (m³)</th></tr></thead>
+                      <tbody id="bulkRegionRows"></tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="tab-pane" id="tab-service">
+            <div class="section-card">
+              <div class="section-head"><div><h2>2.0 Service Connection</h2><p>Enter service connection and application details.</p></div></div>
+              <div class="friendly-form">
+                <div class="entry-row"><label>2.1 Total No of service connections at the beginning of the month</label><input type="number" data-store="service.beginning" class="form-control"></div>
+                <div class="entry-row"><label>2.2 No of new connection given during the month</label><input type="number" data-store="service.newConnections" class="form-control"></div>
+                <div class="entry-row"><label>2.3 Total No of service connection at the end of the month (2.1 + 2.2)</label><input type="number" data-store="service.endTotal" id="serviceEndTotal" class="form-control calc-box" readonly></div>
+                <div class="entry-row"><label>2.4 No of Application issued</label><input type="number" data-store="service.applicationIssued" class="form-control"></div>
+                <div class="entry-row"><label>2.5 No of Application received</label><input type="number" data-store="service.applicationReceived" class="form-control"></div>
+                <div class="entry-row"><label>2.6 No of estimate issued</label><input type="number" data-store="service.estimateIssued" class="form-control"></div>
+                <div class="entry-row"><label>2.7 No of Application in hand for estimation (2.5 - 2.6)</label><input type="number" data-store="service.inHand" id="serviceInHand" class="form-control calc-box" readonly></div>
+                <div class="entry-row"><label>2.8 Total No of Applicants in the waiting list</label><input type="number" data-store="service.waitingList" class="form-control"></div>
+              </div>
+            </div>
+          </section>
+
+          <section class="tab-pane" id="tab-complaints">
+            <div class="section-card">
+              <div class="section-head"><div><h2>3.0 Customer Complaints</h2><p>Enter complaint summary exactly like the monthly report.</p></div></div>
+              <div class="row g-3">
+                <div class="col-lg-7">
+                  <div class="friendly-form single">
+                    <div class="entry-row"><label>3.1 No of complaints received</label><input type="number" data-store="complaints.received" class="form-control"></div>
+                    <div class="entry-row"><label>3.2 No of complaints solved</label><input type="number" data-store="complaints.solved" class="form-control"></div>
+                    <div class="entry-row"><label>3.3 No of outstanding complaints</label><input type="number" data-store="complaints.outstanding" id="complaintsOutstanding" class="form-control calc-box" readonly></div>
+                  </div>
+                </div>
+                <div class="col-lg-5">
+                  <div class="simple-panel">
+                    <h3>Complaint Type</h3>
+                    <label class="form-label">Operational</label>
+                    <input type="number" data-store="complaints.operational" class="form-control mb-3">
+                    <label class="form-label">Commercial</label>
+                    <input type="number" data-store="complaints.commercial" class="form-control mb-3">
+                    <div class="message-pill" id="complaintBreakupSummary">Operational + Commercial = 0</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="tab-pane" id="tab-leaks">
+            <div class="section-card">
+              <div class="section-head"><div><h2>4.0 Water Leaks</h2><p>Distribution / transmission leak report.</p></div></div>
+              <div class="table-responsive simple-table-wrap">
+                <table class="table table-bordered align-middle simple-table" id="leaksTable">
+                  <thead><tr><th>Size (mm)</th><th>Pipe Type</th><th>No of leaks reported</th><th>No of leak repaired</th><th>No of leak outstanding</th></tr></thead>
+                  <tbody id="leakRows"></tbody>
+                  <tfoot><tr><th colspan="2" class="text-end">Total</th><th id="leakReportedTotal">0</th><th id="leakRepairedTotal">0</th><th id="leakOutstandingTotal">0</th></tr></tfoot>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <section class="tab-pane" id="tab-pipeline">
+            <div class="section-card">
+              <div class="section-head"><div><h2>5.0 Pipe Line Extension / Replaced</h2><p>Road wise pipe extension and replacement details.</p></div><span class="unit-pill">Annexure 01</span></div>
+              <div class="table-responsive simple-table-wrap">
+                <table class="table table-bordered align-middle simple-table" id="pipelineTable">
+                  <thead><tr><th>Name of the road</th><th>Diameter (mm)</th><th>Type</th><th>Length (m)</th><th>Dia of old pipe</th><th>Dia of new pipe</th></tr></thead>
+                  <tbody id="pipelineRows"></tbody>
+                  <tfoot><tr><th colspan="3" class="text-end">Total Length</th><th><input id="pipelineTotalLength" class="form-control form-control-sm calc-box" readonly></th><th colspan="2"></th></tr></tfoot>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <section class="tab-pane" id="tab-meters">
+            <div class="section-card">
+              <div class="section-head"><div><h2>6.0 Defective Water Meter Replacement</h2><p>Enter defective meter reported and replaced values.</p></div></div>
+              <div class="friendly-form">
+                <div class="entry-row"><label>6.1 No of defective meter reported</label><input type="number" data-store="meters.reported" class="form-control"></div>
+                <div class="entry-row"><label>6.2 No of defective meter replaced</label><input type="number" data-store="meters.replaced" class="form-control"></div>
+                <div class="entry-row"><label>Pending defective meters</label><input type="number" id="meterPending" class="form-control calc-box" readonly></div>
+              </div>
+            </div>
+          </section>
+
+          <section class="tab-pane" id="tab-valves">
+            <div class="section-card">
+              <div class="section-head"><div><h2>7.0 Valves</h2><p>Type of service: Repairs / Replaced / New installation / Preventive maintenance.</p></div></div>
+              <div class="table-responsive simple-table-wrap">
+                <table class="table table-bordered align-middle simple-table" id="valvesTable">
+                  <thead><tr><th>Name of the road</th><th>Size of the valve (mm)</th><th>Dia of pipe (mm)</th><th>Type of valve</th><th>Type of service</th><th>X Coordinate</th><th>Y Coordinate</th></tr></thead>
+                  <tbody id="valveRows"></tbody>
+                </table>
+              </div>
+              <div class="valve-help mt-3">
+                <strong>Valve short names:</strong> SV = Sluice Valve, AV = Air Valve, WO = Wash Out Valve, PRV = Pressure Reducing Valve, PSV = Pressure Sustaining Valve
+              </div>
+            </div>
+          </section>
+
+          <section class="tab-pane" id="tab-illegal">
+            <div class="section-card">
+              <div class="section-head"><div><h2>8.0 Illegal Water Connections</h2><p>Enter detected, reported and disconnected illegal connections.</p></div></div>
+              <div class="friendly-form">
+                <div class="entry-row"><label>8.1 No of illegal connections detected</label><input type="number" data-store="illegal.detected" class="form-control"></div>
+                <div class="entry-row"><label>8.2 No of illegal connections reported</label><input type="number" data-store="illegal.reported" class="form-control"></div>
+                <div class="entry-row"><label>8.3 No of illegal connections disconnected</label><input type="number" data-store="illegal.disconnected" class="form-control"></div>
+                <div class="entry-row"><label>Remaining not disconnected</label><input type="number" id="illegalRemaining" class="form-control calc-box" readonly></div>
+              </div>
+            </div>
+          </section>
+
+          <section class="tab-pane" id="tab-bulk">
+            <div class="section-card">
+              <div class="section-head"><div><h2>9.0 Bulk</h2><p>Bulk meter location and service details.</p></div></div>
+              <div class="table-responsive simple-table-wrap">
+                <table class="table table-bordered align-middle simple-table" id="bulkTable">
+                  <thead><tr><th>Size of the bulk meter</th><th>Location</th><th>Type of service done</th><th>X Coordinate</th><th>Y Coordinate</th></tr></thead>
+                  <tbody id="bulkRows"></tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <section class="tab-pane" id="tab-arrears">
+            <div class="section-card">
+              <div class="section-head"><div><h2>10.0 Collection of Billing Arrears</h2><p>Enter disconnection orders, payments, disconnections and reconnections.</p></div></div>
+              <div class="friendly-form">
+                <div class="entry-row"><label>10.1 No of disconnection orders received</label><input type="number" data-store="arrears.orders" class="form-control"></div>
+                <div class="entry-row"><label>10.2 No of connections paid</label><input type="number" data-store="arrears.paid" class="form-control"></div>
+                <div class="entry-row"><label>10.3 No of connections disconnected</label><input type="number" data-store="arrears.disconnected" class="form-control"></div>
+                <div class="entry-row"><label>10.4 No of disconnected connections surveyed</label><input type="number" data-store="arrears.surveyed" class="form-control"></div>
+                <div class="entry-row"><label>10.5 No of connections re-connected</label><input type="number" data-store="arrears.reconnected" class="form-control"></div>
+                <div class="entry-row"><label>Remaining orders after paid + disconnected</label><input type="number" id="arrearsRemaining" class="form-control calc-box" readonly></div>
+              </div>
+            </div>
+          </section>
+
+          <section class="tab-pane" id="tab-expenditure">
+            <div class="section-card">
+              <div class="section-head"><div><h2>11.0 Expenditure</h2><p>Monthly cost and staff expenditure summary.</p></div></div>
+              <div class="table-responsive expenditure-wrap">
+                <table class="table table-bordered align-middle simple-table" id="expenditureTable">
+                  <thead><tr><th>Item No</th><th>Description</th><th>Amount / Count</th></tr></thead>
+                  <tbody id="expenditureRows"></tbody>
+                  <tfoot><tr><th>11.23</th><th>Total</th><th><input id="expenditureTotal" class="form-control calc-box" readonly></th></tr></tfoot>
+                </table>
+              </div>
+              <div class="signature-line">Signature of the OIC</div>
+            </div>
+          </section>
+        </div>
+
+        <div class="bottom-nav">
+          <button class="btn btn-outline-primary" id="prevTabBtn" type="button">← Previous</button>
+          <button class="btn btn-primary" id="nextTabBtn" type="button">Next →</button>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <div id="printReport" class="print-report" aria-hidden="true"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+Firebase setup checklist
+
+This version uses Firestore without Firebase Authentication, so the previous anonymous-auth step is no longer required.
+
+1. In Firebase Console, create or open project-data-entry-198d0.
+2. Enable Firestore Database.
+3. In Firestore Database > Rules, paste the rules from FIRESTORE_RULES.txt and publish.
+4. Do not open index.html by double-clicking it if you want Firebase sync.
+   Use one of these instead:
+   - VS Code Live Server
+   - python -m http.server 5500
+   - GitHub Pages
+5. Open the site over http or https.
+6. When you see the status badge change to "Firestore Ready", the database is connected.
+7. If the badge stays on "Offline Cache", the Firestore rules were not published yet or Firestore is not enabled.
+
+Important note
+- Because this version has no login, anyone who can open the site can edit the three sheet documents in Firestore.
+- If you want per-user security later, the next step is to add Firebase Authentication and protected rules.

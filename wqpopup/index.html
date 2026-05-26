@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Flood Effect in WTP - Data Entry</title>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="brand">Water Quality</div>
+    <div class="nav-links">
+      <button class="nav-btn active" data-page="entry">Today Entry</button>
+      <button class="nav-btn" data-page="submissions">All Submissions</button>
+    </div>
+    <div class="nav-date" id="navDate"></div>
+    <div class="nav-right">
+      <button id="openCompareBtn" class="nav-btn compare-btn">Compare Tables</button>
+      <div id="todayStamp" class="today-stamp"></div>
+    </div>
+  </nav>
+
+  <div class="page" id="page-entry">
+    <header class="head">
+      <div class="title">Flood Effect in WTP -2025 Nov</div>
+      <div class="sub">RSC (Central)</div>
+
+      </header>
+
+    <main>
+      <div class="table-wrap">
+        <table id="wtpTable">
+          
+          <thead>
+            <tr class="datetime-head">
+              <th colspan="5" class="blank-head"></th>
+              <th colspan="3" class="datetime-cell" id="dtHead1"></th>
+            </tr>
+            <tr>
+              <th rowspan="2" class="no">No</th>
+              <th rowspan="2" class="region">Region</th>
+              <th rowspan="2" class="plant">Plant</th>
+              <th rowspan="2" class="capacity">Plant Capacity<br>(Cum/Day)</th>
+              <th rowspan="2" class="connections">No of<br>Connections</th>
+              <th colspan="3" class="group">Turbidity Readings</th>
+            </tr>
+            <tr>
+              <th class="tcol">Turbidity<br>Level of<br>Raw<br>Water</th>
+              <th class="tcol">Turbidity<br>Level of<br>Treated<br>Water</th>
+              <th class="tcol">RCL value of<br>Treater Water<br>at WTP</th>
+            </tr>
+          </thead>
+
+
+          <tbody id="tbody">
+            <!-- Rows injected by JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <div class="actions">
+        <button id="saveBtn" class="ghost">Save</button>
+        <button id="submitBtn">Submit</button>
+        <button id="exportBtn" class="ghost">Export CSV</button>
+        <button id="resetBtn" class="ghost">Reset</button>
+      </div>
+
+      <div class="note"></div>
+    </main>
+  </div>
+
+
+  <div class="page hidden" id="page-submissions">
+    <header class="head">
+      <div class="title">All Submissions</div>
+      <div class="sub">Select a date to view / edit</div>
+    </header>
+
+    <div class="submissions-layout">
+      <div class="submissions-list">
+        <div class="list-head">
+          <div class="lh-title">Saved / Submitted Dates</div>
+          <button id="refreshSubmissions" class="ghost small">Refresh</button>
+        </div>
+        <div id="submissionsContainer" class="cards"></div>
+      </div>
+
+      <div class="submissions-view">
+        <div class="view-head">
+          <div id="viewTitle" class="view-title">No submission selected</div>
+          <div class="view-actions">
+            <button id="editSubmissionBtn" class="ghost" disabled>Edit</button>
+            <button id="saveEditsBtn" class="ghost" disabled>Save Edits</button>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table id="historyTable">
+            <thead>
+              <tr>
+                <th class="no">No</th>
+                <th class="region">Region</th>
+                <th class="plant">Plant</th>
+                <th class="capacity">Plant Capacity (Cum/Day)</th>
+                <th class="connections">No of Connections</th>
+                <th class="tcol">Raw</th>
+                <th class="tcol">Treated</th>
+                <th class="tcol">RCL</th>
+              </tr>
+            </thead>
+            <tbody id="historyBody"></tbody>
+          </table>
+        </div>
+        <div class="note"></div>
+      </div>
+    </div>
+  </div>
+
+
+
+  
+  <!-- Compare Tables Modal -->
+  <div id="compareModal" class="modal-overlay hidden compare-modal" role="dialog" aria-modal="true">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">Compare Tables</div>
+        <button id="closeCompareBtn" class="modal-close" data-label="Close">Close</button>
+      </div>
+
+      <div class="filter-card">
+        <div class="filter-section-title">Select two dates (or a range)</div>
+        
+        <div class="filter-row compare-dates-row">
+          <label>Date A <input type="date" id="compareDateA"></label>
+          <label>Date B <input type="date" id="compareDateB"></label>
+          <label>Date C <input type="date" id="compareDateC"></label>
+          <label>Date D <input type="date" id="compareDateD"></label>
+          <button id="runCompareBtn" class="btn primary">Compare</button>
+        </div>
+
+        <div class="hint small">
+         
+        </div>
+      </div>
+
+      <div class="filter-card">
+        <div class="filter-section-title" id="compareTitle">Results</div>
+        <div class="compare-actions">
+<button id="closeCompareBtn2" class="btn btn-dark">Close</button>
+        </div>
+        <div id="compareResults" class="compare-results"></div>
+      </div>
+    </div>
+  </div>
+
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>

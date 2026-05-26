@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Rehabilitation Budget – Data Entry</title>
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <link rel="icon" href="data:,">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand brand-link" href="../index.html" title="Back to Project Selector">
+      <div class="brand-title">Rehabilitation Budget</div>
+      <div class="pill">Data Entry</div>
+    </a>
+    <div class="top-actions">
+      <button id="btnTheme" class="btn btn-ghost" title="Toggle theme"><span id="themeIcon">🌙</span> Theme</button>
+      <button id="btnReset" class="btn btn-danger">Reset</button>
+    </div>
+  </header>
+
+  <main class="container">
+
+
+    <section class="metrics" aria-label="Budget overview">
+      <div class="card">
+        <div class="card-label">Total Allocation (2026)</div>
+        <div class="card-value mono" id="mAlloc">0.00</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Total Expenditure (2026)</div>
+        <div class="card-value mono" id="mExp">0.00</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Bills in Finance</div>
+        <div class="card-value mono" id="mFin">0.00</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Overall Progress</div>
+        <div class="card-value mono" id="mProg">0.00%</div>
+        <div class="progress" aria-hidden="true"><div class="progress-bar" id="mProgBar"></div></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <div class="filters">
+          <div class="field">
+            <label>Region</label>
+            <select id="filterRegion"></select>
+          </div>
+          <div class="field">
+            <label>Category</label>
+            <select id="filterCategory"></select>
+          </div>
+          <div class="field field-search">
+            <label>Search</label>
+            <div class="searchbox">
+              <span class="icon">🔎</span>
+              <input id="filterSearch" type="search" placeholder="Contract no, description, contractor">
+              <button id="btnClearSearch" class="btn btn-ghost" title="Clear">✕</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="buttons">
+          <button id="btnAddRow" class="btn btn-primary">+ Add Activity</button>
+          <button id="btnAddRegion" class="btn btn-outline">Add Region</button>
+          <button id="btnAddCategory" class="btn btn-outline">Add Category</button>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <button class="tab active" data-tab="activities">Activities <span class="badge" id="countBadge">0</span></button>
+        <button class="tab" data-tab="summary">Summary</button>
+
+        <div class="tab-right">
+          <label class="switch">
+            <input type="checkbox" id="toggleCompact">
+            <span class="slider"></span>
+          </label>
+          <span class="small">Compact</span>
+          <button class="btn btn-ghost" id="btnPrint">Print</button>
+        </div>
+      </div>
+
+      <div class="tabpanes">
+        <div id="pane-activities" class="pane active">
+          <div class="hint">Tip: click a row to preview details. Use Edit to update.</div>
+          <div class="table-wrap">
+            <table id="activitiesTable">
+              <thead>
+                <tr>
+                  <th>No.</th>
+                  <th>Description</th>
+                  <th>Contract No</th>
+                  <th>Responsibility</th>
+                  <th class="right">TEC/Awarded</th>
+                  <th>Award Date</th>
+                  <th class="right">Duration</th>
+                  <th>End/Completion</th>
+                  <th>Contractor</th>
+                  <th class="right">Allocation (2026)</th>
+                  <th class="right">Expenditure (2026)</th>
+                  <th class="right">Bills in Finance</th>
+                  <th class="right">Bills in Hand</th>
+                  <th>Status</th>
+                  <th>Region</th>
+                  <th>Category</th>
+                  <th class="right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="activitiesTbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="pane-summary" class="pane">
+          <div class="grid">
+            <div class="card">
+              <div class="card-label">Summary by Region</div>
+              <div class="table-wrap">
+                <table id="summaryTable">
+                  <thead>
+                    <tr>
+                      <th>Region</th>
+                      <th class="right">Allocation</th>
+                      <th class="right">Expenditure</th>
+                      <th class="right">Bills (Finance)</th>
+                      <th class="right">Bills (Hand)</th>
+                      <th class="right">Total (Exp+Finance)</th>
+                      <th class="right">Progress</th>
+                    </tr>
+                  </thead>
+                  <tbody id="summaryTbody"></tbody>
+                </table>
+              </div>
+              <div class="hint">Progress = (Expenditure + Bills in Finance) / Allocation</div>
+            </div>
+            <div class="card">
+              <div class="card-label">Quick Checks</div>
+              <ul id="healthChecks" class="list"></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Preview sidebar -->
+  <aside id="preview" class="drawer" aria-hidden="true">
+    <div class="drawer-head">
+      <div class="drawer-title" id="previewTitle">Activity Preview</div>
+      <button class="btn btn-ghost" id="previewClose">✕</button>
+    </div>
+    <div class="drawer-body" id="previewBody"></div>
+    <div class="drawer-actions">
+      <button class="btn btn-primary" id="previewEdit">Edit</button>
+      <button class="btn btn-danger" id="previewDelete">Delete</button>
+    </div>
+  </aside>
+  <div id="backdrop" class="backdrop" hidden></div>
+
+  <!-- Dialogs -->
+  <dialog id="rowDialog" class="dialog">
+    <form method="dialog" id="rowForm">
+      <header class="dialog-head">
+        <h3 id="rowDialogTitle">Add Activity</h3>
+        <div class="dialog-head-actions"><button type="button" class="btn btn-outline" id="rowDialogBack">← Back</button></div>
+        <button type="button" class="btn btn-ghost" id="rowDialogClose">✕</button>
+      </header>
+
+      <input type="hidden" id="rowId">
+
+      <div class="dialog-body">
+        <div class="callout">Fill what you have now — you can always edit later. Fields marked <span class="req">*</span> are required.</div>
+
+        <div class="form-grid">
+          <div class="field">
+            <label>Activity No.</label>
+            <input id="fNo" type="number" min="1" placeholder="Auto generated" readonly>
+            <div class="help">Generated automatically when you add a new activity.</div>
+          </div>
+          <div class="field span-2">
+            <label>Description <span class="req">*</span></label>
+            <input id="fDescription" required placeholder="Work / activity description">
+          </div>
+          <div class="field">
+            <label>Contract No</label>
+            <input id="fContractNo" placeholder="Contract reference">
+          </div>
+
+          <div class="field">
+            <label>Region <span class="req">*</span></label>
+            <select id="fRegion" required></select>
+          </div>
+          <div class="field">
+            <label>Category <span class="req">*</span></label>
+            <select id="fCategory" required></select>
+          </div>
+          <div class="field">
+            <label>Responsibility</label>
+            <input id="fResponsibility" placeholder="Unit / responsible party">
+          </div>
+          <div class="field">
+            <label>Contractor</label>
+            <input id="fContractor" placeholder="Contractor name">
+          </div>
+
+          <div class="field span-4 section">Dates</div>
+
+          <div class="field">
+            <label>Date of Award</label>
+            <input id="fAwardDate" type="date">
+          </div>
+          <div class="field">
+            <label>Duration (Days)</label>
+            <input id="fDuration" type="number" min="0" placeholder="0">
+          </div>
+          <div class="field">
+            <label>Expected End / Completion</label>
+            <input id="fEndDate" type="date">
+          </div>
+          <div class="field">
+            <label>TEC/Awarded Sum</label>
+            <div class="money">
+              <span>LKR</span>
+              <input id="fTec" inputmode="decimal" class="money-input" placeholder="0.00">
+            </div>
+          </div>
+
+          <div class="field span-4 section">2026 Budget</div>
+
+          <div class="field">
+            <label>Approved Allocation (2026)</label>
+            <div class="money">
+              <span>LKR</span>
+              <input id="fAlloc" inputmode="decimal" class="money-input" placeholder="0.00">
+            </div>
+          </div>
+          <div class="field">
+            <label>Expenditure (2026)</label>
+            <div class="money">
+              <span>LKR</span>
+              <input id="fExp" inputmode="decimal" class="money-input" placeholder="0.00">
+            </div>
+          </div>
+          <div class="field">
+            <label>Bills in Finance</label>
+            <div class="money">
+              <span>LKR</span>
+              <input id="fBillsFinance" inputmode="decimal" class="money-input" placeholder="0.00">
+            </div>
+          </div>
+          <div class="field">
+            <label>Bills in Hand</label>
+            <div class="money">
+              <span>LKR</span>
+              <input id="fBillsHand" inputmode="decimal" class="money-input" placeholder="0.00">
+            </div>
+          </div>
+
+          <div class="field span-4">
+            <label>Present Status</label>
+            <textarea id="fStatus" rows="3" placeholder="Progress notes, retention info, delays, etc."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <footer class="dialog-foot">
+        <button type="button" class="btn btn-ghost" id="rowCancel">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <dialog id="quickDialog" class="dialog">
+    <form method="dialog" id="quickForm">
+      <header class="dialog-head">
+        <h3>Quick Add Activity</h3>
+        <div class="dialog-head-actions"><button type="button" class="btn btn-outline" id="quickDialogBack">← Back</button></div>
+        <button type="button" class="btn btn-ghost" id="quickDialogClose">✕</button>
+      </header>
+
+      <div class="dialog-body">
+        <div class="form-grid">
+          <div class="field span-4">
+            <label>Description <span class="req">*</span></label>
+            <input id="qDescription" required placeholder="Work / activity description">
+          </div>
+          <div class="field">
+            <label>Region <span class="req">*</span></label>
+            <select id="qRegion" required></select>
+          </div>
+          <div class="field">
+            <label>Category <span class="req">*</span></label>
+            <select id="qCategory" required></select>
+          </div>
+          <div class="field">
+            <label>Contract No</label>
+            <input id="qContractNo" placeholder="Optional">
+          </div>
+          <div class="field">
+            <label>Contractor</label>
+            <input id="qContractor" placeholder="Optional">
+          </div>
+          <div class="field">
+            <label>Allocation (2026)</label>
+            <div class="money"><span>LKR</span><input id="qAlloc" class="money-input" inputmode="decimal" placeholder="0.00"></div>
+          </div>
+          <div class="field">
+            <label>Bills in Finance</label>
+            <div class="money"><span>LKR</span><input id="qFin" class="money-input" inputmode="decimal" placeholder="0.00"></div>
+          </div>
+          <div class="field span-4">
+            <label>Status</label>
+            <textarea id="qStatus" rows="2" placeholder="Optional"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <footer class="dialog-foot">
+        <button type="button" class="btn btn-ghost" id="quickCancel">Cancel</button>
+        <button type="submit" class="btn btn-primary">Add</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <dialog id="simpleDialog" class="dialog dialog-small">
+    <form method="dialog" id="simpleForm">
+      <header class="dialog-head">
+        <h3 id="simpleTitle">Add Item</h3>
+        <div class="dialog-head-actions"><button type="button" class="btn btn-outline" id="simpleDialogBack">← Back</button></div>
+        <button type="button" class="btn btn-ghost" id="simpleDialogClose">✕</button>
+      </header>
+      <div class="dialog-body">
+        <div class="field">
+          <label id="simpleLabel">Name</label>
+          <input id="simpleInput" required placeholder="">
+          <div class="help" id="simpleHelp"></div>
+        </div>
+      </div>
+      <footer class="dialog-foot">
+        <button type="button" class="btn btn-ghost" id="simpleCancel">Cancel</button>
+        <button type="submit" class="btn btn-primary">Add</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <!-- Toast -->
+  <div id="toast" class="toast" hidden>
+    <div class="toast-title" id="toastTitle">Done</div>
+    <div class="toast-body" id="toastBody">Saved.</div>
+  </div>
+
+  <script type="module" src="assets/js/app.js"></script>
+</body>
+</html>

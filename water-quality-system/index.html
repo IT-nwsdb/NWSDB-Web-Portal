@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Flood Effect in WTP - Data Entry</title>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="brand">Water Quality <button id="masterEditBtn" class="master-edit-btn" title="Edit Plant Capacity & Connections">EDIT</button></div>
+    <div class="nav-links">
+      <button class="nav-btn portal-back-btn" id="backToPortalBtn" type="button">← Back to Main Portal</button>
+      <button class="nav-btn active" data-page="entry">Today Entry</button>
+      <button class="nav-btn" data-page="submissions">All Submissions</button>
+      <button class="nav-btn" id="compareBtn" type="button">Compare (Last 3 Days)</button>
+      <button class="nav-btn" id="compareAllBtn" type="button">Compare All</button>
+      <button class="nav-btn nav-btn-graphs" id="graphsBtn" type="button">Graphs</button>
+      <button class="nav-btn nav-btn-region" id="regionSubmissionsBtn" type="button">Region Submissions</button>
+    </div>
+    <div class="nav-date" id="navDate"></div>
+  </nav>
+
+  <div class="page" id="page-entry">
+    <header class="head">
+      <div class="title">Flood Effect in WTP - Water Quality</div>
+      <div class="sub">RSC (Central)</div>
+
+      </header>
+
+    <main>
+      <div class="table-wrap">
+        <table id="wtpTable">
+          
+          <thead>
+            <tr class="datetime-head">
+              <th colspan="5" class="blank-head"></th>
+              <th colspan="4" class="datetime-cell" id="dtHead1"></th>
+            </tr>
+            <tr>
+              <th rowspan="2" class="no">No</th>
+              <th rowspan="2" class="region">Region</th>
+              <th rowspan="2" class="plant">Plant</th>
+              <th rowspan="2" class="capacity">Plant Capacity<br>(Cum/Day)</th>
+              <th rowspan="2" class="connections">No of<br>Connections</th>
+              <th colspan="4" class="group">Turbidity Readings</th>
+            </tr>
+            <tr>
+              <th class="tcol">Turbidity<br>Level of<br>Raw<br>Water</th>
+              <th class="tcol">Turbidity<br>Level of<br>Treated<br>Water</th>
+              <th class="tcol">RCL value of<br>Treater Water<br>at WTP</th>
+              <th class="tcol">pH value of<br>Treater Water<br>at WTP</th>
+            </tr>
+          </thead>
+
+
+          <tbody id="tbody">
+            <!-- Rows injected by JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <div class="actions">
+        <button id="saveBtn" class="ghost">Save</button>
+        <button id="submitBtn">Submit</button>
+
+        <!-- Compare (3-day view) -->
+<button id="resetBtn" class="ghost">Reset</button>
+      </div>
+
+      <div class="note"></div>
+    </main>
+  </div>
+
+  <!-- Compare Modal (Last 3 Days) -->
+  <div class="modal-overlay hidden" id="compareModal" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="compareTitle">
+      <div class="modal-header">
+        <div>
+          <div id="compareTitle" class="modal-title">Compare (Last 3 Days)</div>
+          <div id="compareSubtitle" class="sub">Today • Yesterday • Day before yesterday</div>
+        </div>
+        <button id="compareClose" class="modal-close" type="button" aria-label="Close"><span class="close-icon" aria-hidden="true"></span></button>
+      </div>
+
+      <div class="table-wrap" style="margin:12px 16px 16px;">
+        <table id="compareTable">
+          <thead id="compareHead"></thead>
+          <tbody id="compareBody"></tbody>
+        </table>
+      </div>
+      <div class="note" id="compareNote" style="margin:0 16px 16px;"></div>
+    </div>
+  </div>
+
+
+  <!-- Compare All Modal (All submitted/saved entries) -->
+  <div class="modal-overlay hidden" id="compareAllModal" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="compareAllTitle">
+      <div class="modal-header">
+        <div>
+          <div id="compareAllTitle" class="modal-title">Compare All</div>
+          <div class="sub">Compare all saved/submitted days</div>
+        </div>
+        <button id="compareAllClose" class="modal-close" type="button" aria-label="Close"><span class="close-icon" aria-hidden="true"></span></button>
+      </div>
+
+      <div class="table-wrap" style="margin:12px 16px 16px;">
+        <table id="compareAllTable">
+          <thead id="compareAllHead"></thead>
+          <tbody id="compareAllBody"></tbody>
+        </table>
+      </div>
+      <div class="note" id="compareAllNote" style="margin:0 16px 16px;"></div>
+    </div>
+  </div>
+
+
+
+
+
+  <!-- Graphs Modal -->
+  <div class="modal-overlay hidden" id="graphsModal" aria-hidden="true">
+    <div class="modal modal-graphs" role="dialog" aria-modal="true" aria-labelledby="graphsTitle">
+      <div class="modal-header">
+        <div>
+          <div id="graphsTitle" class="modal-title">Performance Graphs</div>
+          <div class="sub">Professional trend view for Raw, Treated, RCL and pH readings</div>
+        </div>
+        <button id="graphsClose" class="modal-close" type="button" aria-label="Close"><span class="close-icon" aria-hidden="true"></span></button>
+      </div>
+
+      <div class="graphs-toolbar">
+        <div class="period-switch" role="tablist" aria-label="Chart period">
+          <button class="period-btn active" data-period="daily" type="button">Daily</button>
+          <button class="period-btn" data-period="weekly" type="button">Weekly</button>
+          <button class="period-btn" data-period="monthly" type="button">Monthly</button>
+        </div>
+
+        <div class="graphs-filters">
+          <div class="field-block">
+            <label class="field-label" for="graphPlantSelect">Plant</label>
+            <select id="graphPlantSelect" class="field-input field-select">
+              <option value="__all__">All WTPs (Average)</option>
+            </select>
+          </div>
+          <div class="field-block">
+            <label class="field-label" for="graphRangeSelect">Range</label>
+            <select id="graphRangeSelect" class="field-input field-select">
+              <option value="12">Last 12 periods</option>
+              <option value="24" selected>Last 24 periods</option>
+              <option value="52">Last 52 periods</option>
+              <option value="0">All available</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="graphs-summary" id="graphsSummary"></div>
+
+      <div class="graphs-grid">
+        <section class="chart-card">
+          <div class="chart-card-head">
+            <div class="chart-title">Turbidity Level of Raw Water</div>
+            <div class="chart-subtitle" id="rawChartMeta">Loading…</div>
+          </div>
+          <div class="chart-canvas-wrap"><canvas id="rawChart"></canvas></div>
+        </section>
+
+        <section class="chart-card">
+          <div class="chart-card-head">
+            <div class="chart-title">Turbidity Level of Treated Water</div>
+            <div class="chart-subtitle" id="treatedChartMeta">Loading…</div>
+          </div>
+          <div class="chart-canvas-wrap"><canvas id="treatedChart"></canvas></div>
+        </section>
+
+        <section class="chart-card">
+          <div class="chart-card-head">
+            <div class="chart-title">RCL Value of Treated Water at WTP</div>
+            <div class="chart-subtitle" id="rclChartMeta">Loading…</div>
+          </div>
+          <div class="chart-canvas-wrap"><canvas id="rclChart"></canvas></div>
+        </section>
+
+        <section class="chart-card">
+          <div class="chart-card-head">
+            <div class="chart-title">pH Value of Treated Water at WTP</div>
+            <div class="chart-subtitle" id="phChartMeta">Loading…</div>
+          </div>
+          <div class="chart-canvas-wrap"><canvas id="phChart"></canvas></div>
+        </section>
+      </div>
+
+      <div class="note" id="graphsNote" style="margin:0 16px 16px;"></div>
+    </div>
+  </div>
+
+
+  <!-- Region Submissions Modal -->
+  <div class="modal-overlay hidden" id="regionSubmissionsModal" aria-hidden="true">
+    <div class="modal modal-region" role="dialog" aria-modal="true" aria-labelledby="regionSubmissionsTitle">
+      <div class="modal-header">
+        <div>
+          <div id="regionSubmissionsTitle" class="modal-title">Region Submissions</div>
+          <div class="sub">Pie chart of entered data by region</div>
+        </div>
+        <button id="regionSubmissionsClose" class="modal-close" type="button" aria-label="Close"><span class="close-icon" aria-hidden="true"></span></button>
+      </div>
+
+      <div class="graphs-toolbar region-toolbar">
+        <div class="period-switch" role="tablist" aria-label="Region submission period">
+          <button class="region-period-btn active" data-period="weekly" type="button">Weekly</button>
+          <button class="region-period-btn" data-period="monthly" type="button">Monthly</button>
+        </div>
+
+        <div class="graphs-filters">
+          <div class="field-block">
+            <label class="field-label" for="regionRangeSelect">Range</label>
+            <select id="regionRangeSelect" class="field-input field-select">
+              <option value="4" selected>Last 4 periods</option>
+              <option value="8">Last 8 periods</option>
+              <option value="12">Last 12 periods</option>
+              <option value="0">All available</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="graphs-summary" id="regionSummary"></div>
+
+      <div class="region-grid">
+        <section class="chart-card region-chart-card">
+          <div class="chart-card-head">
+            <div class="chart-title">Entered Data Share by Region</div>
+            <div class="chart-subtitle" id="regionChartMeta">Loading…</div>
+          </div>
+          <div class="region-chart-wrap"><canvas id="regionPieChart"></canvas></div>
+        </section>
+
+        <aside class="region-side-card">
+          <div class="chart-card-head">
+            <div class="chart-title">Region Breakdown</div>
+            <div class="chart-subtitle">Most entered region appears first</div>
+          </div>
+          <div id="regionBreakdown" class="region-breakdown"></div>
+        </aside>
+      </div>
+
+      <div class="note" id="regionSubmissionsNote" style="margin:0 16px 16px;"></div>
+    </div>
+  </div>
+
+
+  <!-- Add Past Entry Modal -->
+  <div class="modal-overlay hidden" id="pastEntryModal">
+    <div class="modal" style="width:min(520px, 96vw);">
+      <div class="modal-header">
+        <div>
+          <div class="modal-title">Add Past Entry</div>
+          <div class="modal-sub">Create or edit an entry for a previous date</div>
+        </div>
+        <button class="modal-close" id="pastEntryClose" type="button" aria-label="Close"><span class="close-icon" aria-hidden="true"></span></button>
+      </div>
+      <div class="modal-body" style="padding:16px;">
+        <label class="field-label" for="pastEntryDate">Select date</label>
+        <input id="pastEntryDate" type="date" class="field-input" />
+        <div class="note" style="margin-top:10px;">
+          If an entry already exists for the selected date, it will be opened for editing.
+        </div>
+      </div>
+      <div class="modal-footer" style="padding:12px 16px; display:flex; justify-content:flex-end; gap:8px;">
+        <button class="ghost" id="pastEntryCancel">Cancel</button>
+        <button class="primary" id="pastEntryContinue">Continue</button>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="page hidden" id="page-submissions">
+    <header class="head">
+      <div class="title">All Submissions</div>
+      <div class="sub">Select a date to view / edit</div>
+      <div class="head-actions">
+        <button id="addPastEntryBtn" class="ghost">+ Add Past Entry</button>
+      </div>
+    </header>
+
+    <div class="submissions-layout">
+      <div class="submissions-list">
+        <div class="list-head">
+          <div class="lh-title">Saved / Submitted Dates</div>
+          <button id="refreshSubmissions" class="ghost small">Refresh</button>
+        </div>
+        <div id="submissionsContainer" class="cards"></div>
+      </div>
+
+      <div class="submissions-view">
+        <div class="view-head">
+          <div id="viewTitle" class="view-title">No submission selected</div>
+          <div class="view-actions">
+            <button id="editSubmissionBtn" class="ghost" disabled>Edit</button>
+            <button id="saveEditsBtn" class="ghost" disabled>Save Edits</button>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table id="historyTable">
+            <thead>
+              <tr>
+                <th class="no">No</th>
+                <th class="region">Region</th>
+                <th class="plant">Plant</th>
+                <th class="capacity">Plant Capacity (Cum/Day)</th>
+                <th class="connections">No of Connections</th>
+                <th class="tcol">Raw</th>
+                <th class="tcol">Treated</th>
+                <th class="tcol">RCL</th>
+                <th class="tcol">pH</th>
+              </tr>
+            </thead>
+            <tbody id="historyBody"></tbody>
+          </table>
+        </div>
+        <div class="note"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function(){
+      var backBtn = document.getElementById('backToPortalBtn');
+      if (backBtn) {
+        backBtn.addEventListener('click', function(){
+          window.location.href = '../webindex.html';
+        });
+      }
+    });
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script type="module" src="script.js"></script>
+</body>
+</html>

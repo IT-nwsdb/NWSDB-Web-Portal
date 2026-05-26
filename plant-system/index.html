@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Water Treatment Plant Details - Central Region</title>
+
+  <!-- Bootstrap CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="container-fluid py-4">
+    <div class="table-wrap">
+      <h2 class="table-title">Water Treatment Plant Details - Central Region</h2>
+
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 no-print">
+        <div>
+          <button id="refreshBtn" class="btn btn-sm btn-dark">Refresh Table</button>
+          <button id="printBtn" class="btn btn-sm btn-outline-dark">Print</button>
+        </div>
+        <div id="statusMessage" class="status-message">Connecting to Firebase...</div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table simple-table align-middle" id="plantTable">
+          <thead>
+            <tr>
+              <th>No.</th>
+              <th>District</th>
+              <th>Region</th>
+              <th>Schemes</th>
+              <th>Name of Treatment Plant</th>
+              <th>Treatment Process</th>
+              <th>Treatment Plants Design Capacity<br>(m³/day)</th>
+              <th>Treatment Plants Present Capacity<br>(m³/day)</th>
+              <th class="no-print">Action</th>
+            </tr>
+          </thead>
+          <tbody id="plantTableBody">
+            <tr>
+              <td colspan="9" class="text-center py-4">Loading data...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Firebase + App JS -->
+  <script type="module" src="script.js"></script>
+</body>
+</html>
